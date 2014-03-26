@@ -1,0 +1,31 @@
+empty ::
+   is-empty: yes
+   has k:    no
+   adjoin k: adjoining of k to empty
+   merge s:  s
+
+adjoining of n to s ::
+   s has n,
+      if-so: s
+      if-not:
+         extension ::
+            is-empty: no
+            has k:    n == k
+            adjoin k: adjoining of k to extension
+            merge s:  merging of extension with s
+
+merging of s1 with s2 ::
+   meld ::
+      is-empty: s1 is-empty &&: s2 is-empty
+      has k:    s1 has k ||: s2 has k
+      adjoin k: adjoining of k to meld
+      merge s:  merging of meld with s
+
+
+finding in xs where ok ::
+   escaping as `return:
+      xs enumerate `i `x:
+         ok of x, if-so: return of i
+   -1
+r ::= 2
+i ::= finding in [1. 2. 3] where `x: x > r
