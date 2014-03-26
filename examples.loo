@@ -1,3 +1,5 @@
+-- From William Cook's essay on OOP vs. ADTs
+
 empty ::
    is-empty: yes
    has k:    no
@@ -21,6 +23,8 @@ merging of s1 with s2 ::
       adjoin k: adjoining of k to meld
       merge s:  merging of meld with s
 
+
+-- From Wouter's Lobster
 
 finding in xs where ok ::
    escaping as `return:
