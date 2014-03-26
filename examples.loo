@@ -1,4 +1,5 @@
 -- From William Cook's essay on OOP vs. ADTs
+-- http://www.cs.utexas.edu/~wcook/Drafts/2009/essay.pdf
 
 empty ::
    is-empty: yes
@@ -25,6 +26,7 @@ merging of s1 with s2 ::
 
 
 -- From Wouter's Lobster
+-- http://strlen.com/lobster
 
 finding in xs where ok ::
    escaping as `return:
