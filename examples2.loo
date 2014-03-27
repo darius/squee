@@ -35,7 +35,7 @@ Merging of S1 with S2 ::
 Finding in Xs where OK ::
    Escaping as `Return:
       Xs enumerate `I `X:
-         Ok of X, if-so: Return of I
+         OK of X, if-so: Return of I
    -1
 R ::= 2
 I ::= Finding in [1. 2. 3] where `X: X > R
