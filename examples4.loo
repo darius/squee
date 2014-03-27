@@ -21,11 +21,11 @@ empty ::
 adjoining n s ::
    s has n,
       if: s                 -- This syntax is pretty fuggly here
-         extension ::
-            is-empty: no
-            has k:    n == k
-            adjoin k: adjoining k extension
-            merge s:  merging extension s
+          extension ::
+             is-empty: no
+             has k:    n == k
+             adjoin k: adjoining k extension
+             merge s:  merging extension s
 
 merging s1 s2:
    meld ::
