@@ -1,0 +1,35 @@
+-- An experiment: a dialect closer to the lambda calculus.
+-- We give up keyword arguments in favor of currying.
+-- But there's still OO dispatch, but you do it by defining
+-- a sum-of-products type (with generated constructors and
+-- destructors). Each object follows some protocol that's such
+-- an algebra.
+-- Syntax details are especially fuzzy here right now.
+
+algebra
+   is-empty
+   has k
+   adjoin k
+   merge s
+
+empty ::
+   is-empty: yes
+   has k:    no
+   adjoin k: adjoining k empty
+   merge s:  s
+
+adjoining n s ::
+   s .has n,
+      .if: s                 -- This syntax is pretty fuggly here
+           extension ::
+              is-empty: no
+              has k:    n == k
+              adjoin k: adjoining k extension
+              merge s:  merging extension s
+
+merging s1 s2:
+   meld ::
+      is-empty: s1 .is-empty &&: s2 .is-empty
+      has k:    s1 .has k ||: s2 .has k
+      adjoin k: adjoining k meld
+      merge s:  merging meld s
