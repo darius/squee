@@ -1,0 +1,41 @@
+-- An experiment: 
+-- I'd like there to be a lexical distinction between variables
+-- and selector symbols. Let's try upper- vs. lowercase.
+
+-- From William Cook's essay on OOP vs. ADTs
+-- http://www.cs.utexas.edu/~wcook/Drafts/2009/essay.pdf
+
+Empty ::
+   is-empty: Yes
+   has K:    No
+   adjoin K: Adjoining of K to Empty
+   merge S:  S
+
+Adjoining of N to S ::
+   S has N,
+      if-so: S
+      if-not:
+         Extension ::
+            is-empty: No
+            has K:    N == K
+            adjoin K: Adjoining of K to Extension
+            Merge s:  Merging of Extension with S
+
+Merging of S1 with S2 ::
+   Meld ::
+      is-empty: S1 is-empty &&: S2 is-empty
+      has K:    S1 has K ||: S2 has K
+      adjoin K: Adjoining of K to Meld
+      merge S:  Merging of Meld with S
+
+
+-- From Wouter's Lobster
+-- http://strlen.com/lobster
+
+Finding in Xs where OK ::
+   Escaping as `Return:
+      Xs enumerate `I `X:
+         Ok of X, if-so: Return of I
+   -1
+R ::= 2
+I ::= Finding in [1. 2. 3] where `X: X > R
