@@ -19,7 +19,7 @@ Adjoining of N to S ::
             is-empty: No
             has K:    N == K
             adjoin K: Adjoining of K to Extension
-            merge s:  Merging of Extension with S
+            merge S:  Merging of Extension with S
 
 Merging of S1 with S2 ::
    Meld ::
