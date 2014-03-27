@@ -4,3 +4,7 @@ vulnerabilities.
 
 Another language idea: combine these LOO ideas with Parson ideas to
 make a classless Ometa-ish thing.
+
+Newspeak is stylistically similar -- I think the biggest difference is
+that fetching a variable is also a message send, to the environment
+object.

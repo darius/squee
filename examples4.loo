@@ -19,17 +19,17 @@ empty ::
    merge s:  s
 
 adjoining n s ::
-   s .has n,
-      .if: s                 -- This syntax is pretty fuggly here
-           extension ::
-              is-empty: no
-              has k:    n == k
-              adjoin k: adjoining k extension
-              merge s:  merging extension s
+   s has n,
+      if: s                 -- This syntax is pretty fuggly here
+         extension ::
+            is-empty: no
+            has k:    n == k
+            adjoin k: adjoining k extension
+            merge s:  merging extension s
 
 merging s1 s2:
    meld ::
-      is-empty: s1 .is-empty &&: s2 .is-empty
-      has k:    s1 .has k ||: s2 .has k
+      is-empty: s1 is-empty &&: s2 is-empty
+      has k:    s1 has k ||: s2 has k
       adjoin k: adjoining k meld
       merge s:  merging meld s
