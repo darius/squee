@@ -1,3 +1,6 @@
 Maybe take syntax inspiration from that "config file for humans"
 proposal from that github guy. That was in reaction to the YAML
 vulnerabilities.
+
+Another language idea: combine these LOO ideas with Parson ideas to
+make a classless Ometa-ish thing.
