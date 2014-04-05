@@ -76,15 +76,20 @@ tag_string   = tagger('string')
 parse = Parser(lexer, **globals())
 
 def dentify(tokens):
-    margins = [-1]
+    margins = [0]
     tokens = iter(tokens)
     for token in tokens:
-        while token[0] == 'dent' and token[1] < margins[-1]:
-            yield '}', ''
-            yield '\n', ''
-            margins.pop()
-            token = next(tokens)
-        if token[0] == 'dent':
+        if token[0] == 'dent' and token[1] < margins[-1]:
+            while True:
+                yield '}', ''
+#                yield '\n', ''
+                margins.pop()
+                if token[1] == margins[-1]:
+                    break
+                elif margins[-1] < token[1]:
+                    raise "Mismatching indent"
+            continue
+        elif token[0] == 'dent':
             if token[1] == margins[-1]:
                 yield '\n', ''
             else:
@@ -101,22 +106,81 @@ def show(tokens):
     depth = 0
     wtf = []
     indent = '   '
+    newline = True
     for token in tokens:
-        if token[0] == '\n':
+        if token[0] == '\n' or newline:
             write('\n' + indent * depth)
+            newline = False
+        if token[0] == '\n':
+            continue
+        write(' ' + (token[1] or token[0]))
+        if token[0] == '}':
+            depth -= 1
+            newline = True
+        elif token[0] == '{':
+            depth += 1
+            newline = True
         else:
-            write(' ' + (token[1] or token[0]))
-            if token[0] == '{':
-                depth += 1
-                write('\n' + (indent * depth))
-            elif token[0] == '}':
-                depth -= 1
-            else:
-                pass
+            pass
     print '\n'
     #return wtf
 
 text = r"""
+hey
+   once
+      twice
+back again
+"""
+## for x in dentify(parse(text)): print x
+#. ('\n', '')
+#. ('symbol', 'hey')
+#. ('{', '')
+#. ('symbol', 'once')
+#. ('{', '')
+#. ('symbol', 'twice')
+#. ('}', '')
+#. ('}', '')
+#. ('symbol', 'back')
+#. ('symbol', 'again')
+#. ('\n', '')
+## for x in show(dentify(parse(text1))): print x
+#. 
+#.  make-sokoboard {
+#.     grid
+#.     width
+#.     I :: {
+#.        find-player {
+#.           grid find i default : grid find I }
+#.        move thing from here to there {
+#.           thing has ( grid at here ) && ( :  . has ( grid at there ) ) , {
+#.              if-so : {
+#.                 I clear here
+#.                 I drop thing at there }
+#.              }
+#.           }
+#.        clear pos {
+#.           grid at pos put ( I target pos , if-so ( : . ) if-not ( :   ) ) }
+#.        target pos {
+#.           .@I has ( grid at pos ) }
+#.        drop thing at pos {
+#.           grid at pos put {
+#.              thing at ( . = grid at pos , if-so ( : 1 ) if-not ( : 0 ) ) }
+#.           }
+#.        }
+#.     :: {
+#.        render {
+#.           grid freeze }
+#.        push dir {
+#.           p ::= I find-player
+#.           I move o@ from ( p + dir ) to ( p + dir + dir )
+#.           I move iI from p to ( p + dir ) }
+#.        }
+#.     }
+#. 
+#. TypeError: 'NoneType' object is not iterable
+
+
+text1 = r"""
 make-sokoboard
    grid
    width
@@ -144,39 +208,6 @@ make-sokoboard
          I move 'o@' from (p+dir) to (p+dir+dir)
          I move 'iI' from p to (p+dir)
 """
-
-## for x in show(dentify(parse(text))): print x
-#.  {
-#.     make-sokoboard {
-#.        grid
-#.        width
-#.        I :: {
-#.           find-player {
-#.              grid find i default : grid find I }
-#.           move thing from here to there {
-#.              thing has ( grid at here ) && ( :  . has ( grid at there ) ) , {
-#.                 if-so : {
-#.                    I clear here
-#.                    I drop thing at there }
-#.                 clear pos }
-#.              grid at pos put ( I target pos , if-so ( : . ) if-not ( :   ) ) }
-#.           target pos {
-#.              .@I has ( grid at pos ) }
-#.           drop thing at pos {
-#.             
-#.              grid at pos put {
-#.                 thing at ( . = grid at pos , if-so ( : 1 ) if-not ( : 0 ) ) }
-#.              :: }
-#.           render {
-#.              grid freeze }
-#.           push dir {
-#.              p ::= I find-player
-#.              I move o@ from ( p + dir ) to ( p + dir + dir )
-#.              I move iI from p to ( p + dir ) }
-#.          
-#. 
-#. TypeError: 'NoneType' object is not iterable
-
 
 """
    wtf
