@@ -82,7 +82,6 @@ def dentify(tokens):
         if token[0] == 'dent' and token[1] < margins[-1]:
             while True:
                 yield '}', ''
-#                yield '\n', ''
                 margins.pop()
                 if token[1] == margins[-1]:
                     break
