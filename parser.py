@@ -81,6 +81,7 @@ def dentify(tokens):
     for token in tokens:
         while token[0] == 'dent' and token[1] < margins[-1]:
             yield '}', ''
+            yield '\n', ''
             margins.pop()
             token = next(tokens)
         if token[0] == 'dent':
@@ -94,39 +95,91 @@ def dentify(tokens):
             yield token
 
 def show(tokens):
+    def write(x):
+        sys.stdout.write(str(x))
+        wtf.append((depth, token, x))
     depth = 0
+    wtf = []
+    indent = '   '
     for token in tokens:
-        print token[1] or token[0],
         if token[0] == '\n':
-            print ('  ' * depth),
-        elif token[0] == '{':
-            print '\n' + ('  ' * depth),
-            depth += 1
-        elif token[0] == '}':
-            depth -= 1
-            print '\n' + ('  ' * depth),
+            write('\n' + indent * depth)
         else:
-            pass
+            write(' ' + (token[1] or token[0]))
+            if token[0] == '{':
+                depth += 1
+                write('\n' + (indent * depth))
+            elif token[0] == '}':
+                depth -= 1
+            else:
+                pass
+    print '\n'
+    #return wtf
 
 text = r"""
--- Thoughts:
+make-sokoboard
+   grid
+   width
+   I ::
+      find-player
+         grid find 'i' default: grid find 'I'
+      move thing from here to there
+         thing has (grid at here) && (: ' .' has (grid at there)),
+            if-so:
+               I clear here
+               I drop thing at there
+      clear pos
+         grid at pos put (I target pos, if-so (:'.') if-not (:' '))
+      target pos
+         '.@I' has (grid at pos)
+      drop thing at pos
+         -- Pre: I'm clear at pos
+         grid at pos put 
+            thing at ('.' = grid at pos, if-so (:1) if-not (:0))
+   ::
+      render
+         grid freeze
+      push dir
+         p ::= I find-player
+         I move 'o@' from (p+dir) to (p+dir+dir)
+         I move 'iI' from p to (p+dir)
+"""
 
--- We don't really need the ':' at the end of method declarations,
--- since we'll be viewing them in a dedicated editor that could 
--- color-code them -- no worries about too little redundancy.
--- That leaves two plausible uses for the ':': for blocks and for
--- avoiding some parentheses. Let's try blocks here.
--- (But we would still need : in one-line method defs...)
+## for x in show(dentify(parse(text))): print x
+#.  {
+#.     make-sokoboard {
+#.        grid
+#.        width
+#.        I :: {
+#.           find-player {
+#.              grid find i default : grid find I }
+#.           move thing from here to there {
+#.              thing has ( grid at here ) && ( :  . has ( grid at there ) ) , {
+#.                 if-so : {
+#.                    I clear here
+#.                    I drop thing at there }
+#.                 clear pos }
+#.              grid at pos put ( I target pos , if-so ( : . ) if-not ( :   ) ) }
+#.           target pos {
+#.              .@I has ( grid at pos ) }
+#.           drop thing at pos {
+#.             
+#.              grid at pos put {
+#.                 thing at ( . = grid at pos , if-so ( : 1 ) if-not ( : 0 ) ) }
+#.              :: }
+#.           render {
+#.              grid freeze }
+#.           push dir {
+#.              p ::= I find-player
+#.              I move o@ from ( p + dir ) to ( p + dir + dir )
+#.              I move iI from p to ( p + dir ) }
+#.          
+#. 
+#. TypeError: 'NoneType' object is not iterable
 
--- If we made *all* binding instances of variables start with `
--- then it'd be natural to extend this with patterns somehow, in
--- the places you can bind variables -- it'd be easy to distinguish
--- the variables from the pattern pieces. Look into Barry Jay's
--- stuff again?
 
-make-sokoboard of initial-grid ::
-   grid ::= initial-grid thaw  -- Make a mutable copy. (What's a better name?)
-   width ::= grid find '\n' + 1
+"""
+   wtf
    I ::
       find-player
          grid find 'i' default: grid find 'I'
@@ -150,44 +203,3 @@ make-sokoboard of initial-grid ::
          I move 'o@' from (p+dir) to (p+dir+dir)
          I move 'iI' from p to (p+dir)
 """
-
-## show(dentify(parse(text)))
-#. { 
-#. 
-#.    
-#.    
-#.    
-#.    
-#.    
-#.    
-#.    
-#.    
-#.    
-#.    
-#.    
-#.    make-sokoboard of initial-grid :: { 
-#.    grid ::= initial-grid thaw 
-#.      width ::= grid find \n + 1 
-#.      I :: { 
-#.      find-player { 
-#.        grid find i default : grid find I } 
-#.        move thing from here to there { 
-#.        thing has ( grid at here ) && ( :  . has ( grid at there ) ) , { 
-#.          if-so : I clear here { 
-#.            I drop thing at there } 
-#.            clear pos } 
-#.          grid at pos put ( I target pos , if-so ( : . ) if-not ( :   ) ) } 
-#.        target pos { 
-#.        .@I has ( grid at pos ) } 
-#.        drop thing at pos { 
-#.        
-#.          grid at pos put { 
-#.          thing at ( . = grid at pos , if-so ( : 1 ) if-not ( : 0 ) ) } 
-#.          :: } 
-#.        render { 
-#.        grid freeze } 
-#.        push dir { 
-#.        p ::= I find-player 
-#.          I move o@ from ( p + dir ) to ( p + dir + dir ) 
-#.          I move iI from p to ( p + dir ) } 
-#.       

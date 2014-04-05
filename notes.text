@@ -8,3 +8,9 @@ make a classless Ometa-ish thing.
 Newspeak is stylistically similar -- I think the biggest difference is
 that fetching a variable is also a message send, to the environment
 object.
+
+And Self should be worth study:
+http://handbook.selflanguage.org/4.5/langref.html
+
+Conceivably also:
+https://github.com/TikhonJelvis/TPL/
