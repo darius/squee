@@ -3,10 +3,7 @@ sys.setrecursionlimit(3000)
 
 from peglet import Parser, join
 
-# This exposes a shortcoming of peglet: it's meant only for strings.
-# Also, recursion depth, argh.
-
-g = r"""
+parser_grammar = r"""
 program = sequence !.
 sequence = big newlines opt_sequence
 opt_sequence = sequence | 
@@ -51,12 +48,9 @@ comment  = --[^\n]*
 dent     = (\n\s*)                       tag_dent
 number   = (-?\d+)                       tag_number
 symbol   = ([A-Za-z][_A-Za-z0-9-]*)      tag_symbol
-punct    = (::=|::|:|[(),])              tag_punct
+punct    = (::=|::|:|[`()\[\],;])        tag_punct
 operator = ([~!@%&*\-+=|\\<>?\/]+)       tag_operator
-
-string   = ' qchars '               join tag_string
-qchars   = qchar qchars |
-qchar    = '(') | ([^'])
+string   = ('(?:''|[^'])*')              tag_string
 """
 
 def tag_dent(text):
@@ -73,7 +67,8 @@ tag_symbol   = tagger('symbol')
 tag_operator = tagger('operator')
 tag_string   = tagger('string')
 
-parse = Parser(lexer, **globals())
+scan = Parser(lexer, **globals())
+parse_scanned = Parser(parser_grammar, **globals())
 
 def dentify(tokens):
     margins = [0]
@@ -99,20 +94,16 @@ def dentify(tokens):
             yield token
 
 def show(tokens):
-    def write(x):
-        sys.stdout.write(str(x))
-        wtf.append((depth, token, x))
     depth = 0
-    wtf = []
     indent = '   '
     newline = True
     for token in tokens:
         if token[0] == '\n' or newline:
-            write('\n' + indent * depth)
+            yield '\n' + indent * depth
             newline = False
         if token[0] == '\n':
             continue
-        write(' ' + (token[1] or token[0]))
+        yield token[1] or token[0]
         if token[0] == '}':
             depth -= 1
             newline = True
@@ -121,8 +112,6 @@ def show(tokens):
             newline = True
         else:
             pass
-    print '\n'
-    #return wtf
 
 text = r"""
 hey
@@ -130,7 +119,7 @@ hey
       twice
 back again
 """
-## for x in dentify(parse(text)): print x
+## for x in dentify(scan(text)): print x
 #. ('\n', '')
 #. ('symbol', 'hey')
 #. ('{', '')
@@ -142,41 +131,39 @@ back again
 #. ('symbol', 'back')
 #. ('symbol', 'again')
 #. ('\n', '')
-## for x in show(dentify(parse(text1))): print x
+## print ' '.join(show(dentify(scan(text1))))
 #. 
-#.  make-sokoboard {
-#.     grid
-#.     width
-#.     I :: {
-#.        find-player {
-#.           grid find i default : grid find I }
-#.        move thing from here to there {
-#.           thing has ( grid at here ) && ( :  . has ( grid at there ) ) , {
-#.              if-so : {
-#.                 I clear here
-#.                 I drop thing at there }
-#.              }
-#.           }
-#.        clear pos {
-#.           grid at pos put ( I target pos , if-so ( : . ) if-not ( :   ) ) }
-#.        target pos {
-#.           .@I has ( grid at pos ) }
-#.        drop thing at pos {
-#.           grid at pos put {
-#.              thing at ( . = grid at pos , if-so ( : 1 ) if-not ( : 0 ) ) }
-#.           }
-#.        }
-#.     :: {
-#.        render {
-#.           grid freeze }
-#.        push dir {
-#.           p ::= I find-player
-#.           I move o@ from ( p + dir ) to ( p + dir + dir )
-#.           I move iI from p to ( p + dir ) }
-#.        }
+#.  make-sokoboard { 
+#.     grid 
+#.     width 
+#.     I :: { 
+#.        find-player { 
+#.           grid find 'i' default : grid find 'I' } 
+#.        move thing from here to there { 
+#.           thing has ( grid at here ) && ( : ' .' has ( grid at there ) ) , { 
+#.              if-so : { 
+#.                 I clear here 
+#.                 I drop thing at there } 
+#.              } 
+#.           } 
+#.        clear pos { 
+#.           grid at pos put ( I target pos , if-so ( : '.' ) if-not ( : ' ' ) ) } 
+#.        target pos { 
+#.           '.@I' has ( grid at pos ) } 
+#.        drop thing at pos { 
+#.           grid at pos put { 
+#.              thing at ( '.' = grid at pos , if-so ( : 1 ) if-not ( : 0 ) ) } 
+#.           } 
+#.        } 
+#.     :: { 
+#.        render { 
+#.           grid freeze } 
+#.        push dir { 
+#.           p ::= I find-player 
+#.           I move 'o@' from ( p + dir ) to ( p + dir + dir ) 
+#.           I move 'iI' from p to ( p + dir ) } 
+#.        } 
 #.     }
-#. 
-#. TypeError: 'NoneType' object is not iterable
 
 
 text1 = r"""
@@ -208,28 +195,41 @@ make-sokoboard
          I move 'iI' from p to (p+dir)
 """
 
-"""
-   wtf
-   I ::
-      find-player
-         grid find 'i' default: grid find 'I'
-      move thing from here to there
-         thing has (grid at here) && (: ' .' has (grid at there)),
-            if-so: I clear here
-                   I drop thing at there
-      clear pos
-         grid at pos put (I target pos, if-so (:'.') if-not (:' '))
-      target pos
-         '.@I' has (grid at pos)
-      drop thing at pos
-         -- Pre: I'm clear at pos
-         grid at pos put 
-            thing at ('.' = grid at pos, if-so (:1) if-not (:0))
-   ::
-      render
-         grid freeze
-      push dir
-         p ::= I find-player
-         I move 'o@' from (p+dir) to (p+dir+dir)
-         I move 'iI' from p to (p+dir)
-"""
+## examples = open('examples.loo').read()
+## print ' '.join(show(dentify(scan(examples))))
+#. 
+#.  
+#.  empty :: { 
+#.     is-empty : yes 
+#.     has k : no 
+#.     adjoin k : adjoining of k to empty 
+#.     merge s : s } 
+#.  adjoining of n to s :: { 
+#.     s has n , { 
+#.        if-so : s 
+#.        if-not : { 
+#.           extension :: { 
+#.              is-empty : no 
+#.              has k : n == k 
+#.              adjoin k : adjoining of k to extension 
+#.              merge s : merging of extension with s } 
+#.           } 
+#.        } 
+#.     } 
+#.  merging of s1 with s2 :: { 
+#.     meld :: { 
+#.        is-empty : s1 is-empty && : s2 is-empty 
+#.        has k : s1 has k || : s2 has k 
+#.        adjoin k : adjoining of k to meld 
+#.        merge s : merging of meld with s } 
+#.     } 
+#.  
+#.  finding in xs where ok :: { 
+#.     escaping as ` return : { 
+#.        xs enumerate ` i ` x : { 
+#.           ok of x , if-so : return of i } 
+#.        } 
+#.     -1 } 
+#.  r ::= 2 
+#.  i ::= finding in [ 1 ; 2 ; 3 ] where ` x : x > r 
+#. 

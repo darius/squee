@@ -34,4 +34,4 @@ finding in xs where ok ::
          ok of x, if-so: return of i
    -1
 r ::= 2
-i ::= finding in [1. 2. 3] where `x: x > r
+i ::= finding in [1; 2; 3] where `x: x > r
