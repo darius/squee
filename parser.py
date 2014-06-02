@@ -7,7 +7,7 @@ parser_grammar = r"""
 program = sequence !.
 sequence = big newlines opt_sequence
 opt_sequence = sequence | 
-newlines = XXX
+newlines = ; | 
 
 big     = make
         | id ::= big
@@ -21,18 +21,43 @@ methods = method methods |
 method  = method_decl body
 body    = { sequence }
 
-small   = tiny message | tiny
+method_decl = multidecl | unidecl
+unidecl = id
+multidecl = id id opt_multidecl
+opt_multidecl = multidecl | 
 
-message = operator small
-        | id tiny opt_message
-        | id
+small   = tiny opt_message               mk_opt_call
 
-tiny    = number
-        | string
-        | id
-        | \( big \)
+opt_message = message
+            |                            mk_nomessage
+message = multimessage                   mk_multimessage
+        | unimessage
 
+multimessage = id tiny opt_multimessage
+opt_multimessage = multimessage | 
+
+unimessage = id                          mk_unimessage
+
+tiny    = number                     int mk_lit
+        | string                         mk_lit
+        | id                             mk_var
+        | \( _ big \) _
+
+id       = ([A-Za-z][_A-Za-z0-9-]*) _
+number   = (-?\d+)                  _  
+string   = ('(?:''|[^'])*')         _  
+_ = \s*
 """
+
+def mk_opt_call(e, message): return message(e)
+def mk_nomessage(): return lambda e: e
+def mk_unimessage(selector): return lambda e: ('call', e, (selector,), ())
+def mk_multimessage(*args): return lambda e: ('call', e, tuple(args[0::2]), tuple(args[1::2]))
+def mk_lit(c): return ('lit', c)
+def mk_var(name): return ('var', name)
+
+## parse_scanned('adjoining of (k plus 5) to empty')
+#. (('call', ('var', 'adjoining'), ('of', 'to'), (('call', ('var', 'k'), ('plus',), (('lit', 5),)), ('var', 'empty'))),)
 
 lexer = r"""
 program  = tokens !.
@@ -68,7 +93,7 @@ tag_operator = tagger('operator')
 tag_string   = tagger('string')
 
 scan = Parser(lexer, **globals())
-parse_scanned = Parser(parser_grammar, **globals())
+parse_scanned = Parser(parser_grammar, int=int, **globals())
 
 def dentify(tokens):
     margins = [0]
@@ -99,7 +124,7 @@ def show(tokens):
     newline = True
     for token in tokens:
         if token[0] == '\n' or newline:
-            yield '\n' + indent * depth
+            yield '\n' + (';' if token[0] == '\n' else '') + indent * depth
             newline = False
         if token[0] == '\n':
             continue
@@ -133,17 +158,17 @@ back again
 #. ('\n', '')
 ## print ' '.join(show(dentify(scan(text1))))
 #. 
-#.  make-sokoboard { 
+#. ; make-sokoboard { 
 #.     grid 
-#.     width 
-#.     I :: { 
+#. ;    width 
+#. ;    I :: { 
 #.        find-player { 
 #.           grid find 'i' default : grid find 'I' } 
 #.        move thing from here to there { 
 #.           thing has ( grid at here ) && ( : ' .' has ( grid at there ) ) , { 
 #.              if-so : { 
 #.                 I clear here 
-#.                 I drop thing at there } 
+#. ;                I drop thing at there } 
 #.              } 
 #.           } 
 #.        clear pos { 
@@ -151,7 +176,7 @@ back again
 #.        target pos { 
 #.           '.@I' has ( grid at pos ) } 
 #.        drop thing at pos { 
-#.           grid at pos put { 
+#. ;          grid at pos put { 
 #.              thing at ( '.' = grid at pos , if-so ( : 1 ) if-not ( : 0 ) ) } 
 #.           } 
 #.        } 
@@ -160,8 +185,8 @@ back again
 #.           grid freeze } 
 #.        push dir { 
 #.           p ::= I find-player 
-#.           I move 'o@' from ( p + dir ) to ( p + dir + dir ) 
-#.           I move 'iI' from p to ( p + dir ) } 
+#. ;          I move 'o@' from ( p + dir ) to ( p + dir + dir ) 
+#. ;          I move 'iI' from p to ( p + dir ) } 
 #.        } 
 #.     }
 
@@ -198,38 +223,38 @@ make-sokoboard
 ## examples = open('examples.loo').read()
 ## print ' '.join(show(dentify(scan(examples))))
 #. 
-#.  
-#.  empty :: { 
+#. ; 
+#. ; empty :: { 
 #.     is-empty : yes 
-#.     has k : no 
-#.     adjoin k : adjoining of k to empty 
-#.     merge s : s } 
+#. ;    has k : no 
+#. ;    adjoin k : adjoining of k to empty 
+#. ;    merge s : s } 
 #.  adjoining of n to s :: { 
 #.     s has n , { 
 #.        if-so : s 
-#.        if-not : { 
+#. ;       if-not : { 
 #.           extension :: { 
 #.              is-empty : no 
-#.              has k : n == k 
-#.              adjoin k : adjoining of k to extension 
-#.              merge s : merging of extension with s } 
+#. ;             has k : n == k 
+#. ;             adjoin k : adjoining of k to extension 
+#. ;             merge s : merging of extension with s } 
 #.           } 
 #.        } 
 #.     } 
 #.  merging of s1 with s2 :: { 
 #.     meld :: { 
 #.        is-empty : s1 is-empty && : s2 is-empty 
-#.        has k : s1 has k || : s2 has k 
-#.        adjoin k : adjoining of k to meld 
-#.        merge s : merging of meld with s } 
+#. ;       has k : s1 has k || : s2 has k 
+#. ;       adjoin k : adjoining of k to meld 
+#. ;       merge s : merging of meld with s } 
 #.     } 
-#.  
-#.  finding in xs where ok :: { 
+#. ; 
+#. ; finding in xs where ok :: { 
 #.     escaping as ` return : { 
 #.        xs enumerate ` i ` x : { 
 #.           ok of x , if-so : return of i } 
 #.        } 
 #.     -1 } 
 #.  r ::= 2 
-#.  i ::= finding in [ 1 ; 2 ; 3 ] where ` x : x > r 
-#. 
+#. ; i ::= finding in [ 1 ; 2 ; 3 ] where ` x : x > r 
+#. ;
