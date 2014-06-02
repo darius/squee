@@ -7,16 +7,19 @@ Abstract syntax, with expressions e, variables v, constants c:
              | Call e selector [e]     array at i put x
              | Actor [method] e        :: double n; 2 * n
              | Define v e              answer ::= 42
-             | Block [e]               foo; bar; baz
+             | Seclude e               foo; bar
+             | Then e1 e2              foo; bar
     method   = Method selector [v] e
     selector = [string] -- XXX arity 0/1 both imply selector has length 1...
 
-A block evaluates its subexpressions in order and returns the last
+A Then evaluates its subexpressions in order and returns the last
 value.
 
 A Define expression evaluates to what its subexpression evaluates to.
-The scope of the variable is the whole block it's defined in;
+The scope of the variable is the whole Seclude it's defined in;
 if it's referenced before it's bound, an error is raised.
+(Seclude was called 'block' in Algol-60; it's renamed here to avoid
+confusion with Smalltalk blocks.)
 
 In Actor the last e should evaluate to a block with selector and
 argument-list parameters; it's called on selector-not-found.
@@ -29,11 +32,6 @@ repr and hash. There's also a default selector-not-found handler.
 If you want mutability, use one of the primitive mutable data
 structures. We don't have mutable variables. (Maybe we should, if only
 for convenience in coding in a workspace.)
-
-XXX name Block something else, to avoid clash with Smalltalk blocks
-XXX also should we split Block into two forms, for delimiting a scope
-and for sequencing? This wouldn't come up if we stuck closer to the
-bare lambda calculus...
 
 
 Term-tree abstract syntax:
