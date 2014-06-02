@@ -134,7 +134,7 @@ class Constant(namedtuple('_Constant', 'value')):
 
 class Fetch(namedtuple('_Fetch', 'name')):
     def eval(self, env, k):
-        return (k, env.get(self.name))
+        return k, env.get(self.name)
     def defs(self):
         return ()
     def __repr__(self):
@@ -166,13 +166,13 @@ class Define(object):
 
 def define_k(value, (env, self), k):
     env.define(self,var, value)
-    return (k, value)
+    return k, value
 
 class Actor(object):
     def __init__(self, methods):
         self.vtable = {method.selector: method for method in methods}
     def eval(self, env, k):
-        return (k, Thing(env, self.vtable))
+        return k, Thing(env, self.vtable)
     def defs(self):
         return ()
     def __repr__(self):
