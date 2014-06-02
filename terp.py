@@ -65,10 +65,12 @@ class GlobalEnv(namedtuple('_GlobalEnv', 'rib')):
     def __repr__(self):
         return 'GlobalEnv'
 
+undefined = object()
+
 class Env(namedtuple('_Env', 'rib container')):
     def define(self, key, value):
         assert key not in self.rib
-        assert value is not None
+        assert value is not undefined
         self[key] = value
     def get(self, key):
         return self.rib[key] if key in self.rib else self.container.get(key)
@@ -142,8 +144,7 @@ class Seclude(object):
     def defs(self):
         return ()
     def eval(self, env, k):
-        # TODO: define a different special value meaning undefined
-        vals = [None for _ in self.vars]
+        vals = [undefined for _ in self.vars]
         return self.expr.eval(env.extend(self.vars, vals), k)
     def __repr__(self):
         return '{%r}' % (self.expr,)
