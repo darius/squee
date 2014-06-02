@@ -69,11 +69,15 @@ undefined = object()
 
 class Env(namedtuple('_Env', 'rib container')):
     def define(self, key, value):
-        assert key not in self.rib
-        assert value is not undefined
+        assert self.rib.get(key) is undefined
         self[key] = value
     def get(self, key):
-        return self.rib[key] if key in self.rib else self.container.get(key)
+        if key in self.rib:
+            value = self.rib[key]
+            assert value is not undefined
+            return value
+        else:
+            return self.container.get(key)
     def extend(self, variables, values):
         return Env(dict(zip(variables, values)), self)
     def __repr__(self):
