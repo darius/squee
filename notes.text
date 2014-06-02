@@ -14,3 +14,138 @@ http://handbook.selflanguage.org/4.5/langref.html
 
 Conceivably also:
 https://github.com/TikhonJelvis/TPL/
+https://github.com/munificent/finch
+
+The L Programming Language & System
+http://home.cc.gatech.edu/tony/61
+
+"The Scheme programming language was born from an attempt in 1975 to
+explicate object-oriented programming in terms that Gerry Sussman and
+I could understand. In particular, we wanted to restate Carl Hewitt's
+theory of actors in words of one syllable, so to speak. One of the
+conclusions that we reached was that "object" need not be a primitive
+notion in a programming language; one can build objects and their
+behavior from little more than assignable value cells and good old
+lambda expressions."
+http://www.dreamsongs.com/ObjectsHaveNotFailedNarr.html
+
+(Where are my other syntax notes?)
+Silly idea: message syntax like Unix command-line args, e.g.
+  receiver -keyword1 arg1 -keyword2 arg2
+I judge this almost a good idea, marred by the confusion we'd get from
+variable-names-also-with-dashes.
+(So, another idea: receiver .keyword1 arg1 .keyword2 arg2)
+But let's give it a chance.
+
+
+How about a rights-amplification primitive?
+http://cap-lore.com/Languages/Scheme/Synergy.html
+Make the extract equivalent take two continuations (fail and succeed):
+  safe := Lock -key k -value v
+  Unlock -safe safe
+         -key x
+         -if-fits `v: succeed
+         -if-not: fail
+You could define an eq? in terms of it:
+  Eq -of x -and y ::     -- (ugh on this syntax)
+    Unlock -safe (Lock -key x -value 'ignored')
+           -key y
+           -if-fits `v: Yes     -- XXX better name?
+           -if-not: No
+Now how about seal/unseal, used like:
+  [seal, unseal] := Sealer -make
+  box    := seal -of 'secret'
+  secret := unseal -of box
+(Actually this is like E's sealers but different from Rees's/Hardy's.)
+Implementation:
+  Sealer -make ::
+      brand := Object -make
+      seal -of secret ::
+          Lock -key brand -value secret
+      unseal ::
+          -of thing:
+              Unlock -safe thing -key brand
+                     -if-fits `secret: secret
+                     -if-not: Error -plaint 'Unsealed the wrong sort of thing'
+                                    -culprit thing
+          -of thing -if-ok on-ok -if-not on-not ::
+              Unlock -safe thing -key brand
+                     -if-fits `secret: on-ok -of secret
+                     -if-not:          on-not -run
+      [seal, unseal]
+Circularly implementing safes using both eq and sealers:
+  [seal-safe, unseal-safe] := Sealer -make
+  Lock -key k -value v ::
+      seal-safe [k, v]
+  Unlock -safe thing -key x -if-fits on-fits -if-not on-not ::
+      unseal-safe -of thing
+                  -if-ok `[k, v]:
+                      (Eq -of k -and x) -if-so: on-fits -of v
+                                        -if-not: on-not -run
+                  -if-not:
+                      on-not -run
+
+Rees sealing would look like (using eq by way of assq):
+  Seal -make ::
+      instances := Box -holding []
+      seal -of rep ::
+          abs := Box -make
+          instances -set ((instances -get) -prefix [abs, rep])
+          abs
+      unseal -of abs ::
+          (instances -get) -assq abs
+                           -if-found `[abs, rep]: rep
+                           -if-not: Error -plaint 'invalid argument'
+                                          -culprit abs
+      is-sealed -of x ::
+          (instances -get) -assq x
+                           -if-found `_: Yes
+                           -if-not: No
+      [seal, unseal, is-sealed]
+Or (using safes):
+  Seal -make ::
+      brand := Box -make
+      seal -of rep ::
+          Lock -key brand -value rep
+      unseal -of abs ::
+          Unlock -safe abs -key brand
+                 -if-fits `rep: rep
+                 -if-not: Error -plaint 'invalid argument'
+                                -culprit abs
+      is-sealed -of x ::
+          Unlock -safe abs -key brand
+                 -if-fits `_: Yes
+                 -if-not: No
+      [seal, unseal, is-sealed]
+Safes in terms of Rees seals:
+  [seal-safe, unseal-safe, is-safe] := Seal -make
+  Lock -key k -value v ::
+      seal-safe [k, v]
+  Unlock -safe thing -key x -if-fits on-fits -if-not on-not ::
+      (is-safe -of thing)
+          -if-so: 
+              [k, v] := unseal-safe -of thing
+                  (Eq -of k -and x) -if-so: on-fits -of v
+                                    -if-not: on-not -run
+          -if-not:
+              on-not -run
+Wait, how do we do this without primitive Eq?
+  Eq -of x -and y ::
+      ...
+
+;to do: code the ADT example from Cook's essay using safes.
+Eq (1, 2)
+Eq .of 1 .and 2
+
+How about capital-letters-mean-variables?
+  [Seal-safe, Unseal-safe, Is-safe] := Seal make
+  Lock key K value V ::
+      Seal-safe of [K, V]
+  Unlock safe Thing key X if-fits On-fits if-not On-not ::
+      (Is-safe of Thing)
+          if-so: 
+              [K, V] := Unseal-safe of Thing
+              (Eq of K and X) if-so: On-fits of V
+                              if-not: On-not run
+          if-not:
+              On-not run
