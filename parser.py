@@ -158,32 +158,32 @@ back again
 #. ('\n', '')
 ## print ' '.join(show(dentify(scan(text1))))
 #. 
-#. ; make-sokoboard { 
-#.     grid 
-#. ;    width 
+#. ; make-sokoboard of initial-grid :: { 
+#.     grid ::= initial-grid thaw 
+#. ;    width ::= grid find '\n' + 1 
 #. ;    I :: { 
-#.        find-player { 
+#.        find-player : { 
 #.           grid find 'i' default : grid find 'I' } 
-#.        move thing from here to there { 
-#.           thing has ( grid at here ) && ( : ' .' has ( grid at there ) ) , { 
+#.        move thing from here to there : { 
+#.           ( thing has ( grid at here ) && ( : ' .' has ( grid at there ) ) ) { 
 #.              if-so : { 
 #.                 I clear here 
 #. ;                I drop thing at there } 
 #.              } 
 #.           } 
-#.        clear pos { 
-#.           grid at pos put ( I target pos , if-so ( : '.' ) if-not ( : ' ' ) ) } 
-#.        target pos { 
+#.        clear pos : { 
+#.           grid at pos put ( ( I target pos ) if-so ( : '.' ) if-not ( : ' ' ) ) } 
+#.        target pos : { 
 #.           '.@I' has ( grid at pos ) } 
-#.        drop thing at pos { 
+#.        drop thing at pos : { 
 #. ;          grid at pos put { 
-#.              thing at ( '.' = grid at pos , if-so ( : 1 ) if-not ( : 0 ) ) } 
+#.              thing at ( ( '.' = grid at pos ) if-so ( : 1 ) if-not ( : 0 ) ) } 
 #.           } 
 #.        } 
 #.     :: { 
-#.        render { 
+#.        render : { 
 #.           grid freeze } 
-#.        push dir { 
+#.        push dir : { 
 #.           p ::= I find-player 
 #. ;          I move 'o@' from ( p + dir ) to ( p + dir + dir ) 
 #. ;          I move 'iI' from p to ( p + dir ) } 
@@ -192,29 +192,29 @@ back again
 
 
 text1 = r"""
-make-sokoboard
-   grid
-   width
+make-sokoboard of initial-grid ::
+   grid ::= initial-grid thaw
+   width ::= grid find '\n' + 1
    I ::
-      find-player
+      find-player:
          grid find 'i' default: grid find 'I'
-      move thing from here to there
-         thing has (grid at here) && (: ' .' has (grid at there)),
+      move thing from here to there:
+         (thing has (grid at here) && (: ' .' has (grid at there)))
             if-so:
                I clear here
                I drop thing at there
-      clear pos
-         grid at pos put (I target pos, if-so (:'.') if-not (:' '))
-      target pos
+      clear pos:
+         grid at pos put ((I target pos) if-so (:'.') if-not (:' '))
+      target pos:
          '.@I' has (grid at pos)
-      drop thing at pos
+      drop thing at pos:
          -- Pre: I'm clear at pos
          grid at pos put 
-            thing at ('.' = grid at pos, if-so (:1) if-not (:0))
+            thing at (('.' = grid at pos) if-so (:1) if-not (:0))
    ::
-      render
+      render:
          grid freeze
-      push dir
+      push dir:
          p ::= I find-player
          I move 'o@' from (p+dir) to (p+dir+dir)
          I move 'iI' from p to (p+dir)
