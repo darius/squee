@@ -180,23 +180,20 @@ class Actor(object):
 
 class Call(namedtuple('_Call', 'subject selector operands')):
     def eval(self, env, k):
-        return self.subject.eval(env,
-                                 (evrands_k, (self, env), k))
+        return self.subject.eval(env, (evrands_k, (self, env), k))
     def defs(self):
         return sum((expr.defs() for expr in (self.subject,) + self.operands),
                    ())
     def __repr__(self):
-        return call_repr(self)
-
-def call_repr(self, sep=''):
-    subject = repr(self.subject) + sep
-    if len(self.operands) == 0:
-        return '(%s %s)' % (subject, self.selector)
-    elif len(self.operands) == 1:
-        return '(%s %s %r)' % (subject, self.selector, self.operands[0])
-    else:
-        pairs = zip(self.selector.split(':'), self.operands)
-        return '(%s%s)' % (subject, ''.join(' %s: %r' % pair for pair in pairs))
+        subject = repr(self.subject)
+        if len(self.operands) == 0:
+            return '(%s %s)' % (subject, self.selector)
+        elif len(self.operands) == 1:
+            return '(%s %s %r)' % (subject, self.selector, self.operands[0])
+        else:
+            pairs = zip(self.selector.split(':'), self.operands)
+            return '(%s%s)' % (subject,
+                               ''.join(' %s: %r' % pair for pair in pairs))
 
 def evrands_k(subject, (self, env), k):
     return evrands(self.operands, env, (call_k, (subject, self), k))
