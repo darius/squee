@@ -59,7 +59,7 @@ class Env(namedtuple('_Env', 'rib container')):
     def adjoin(self, key, value): # for global env only
         self.rib[key] = value
     def define(self, key, value):
-        assert self.get(key) is None
+        assert self.get(key) is None # XXX wait a minute...
         assert value is not None
         self[key] = value
     def get(self, key):
@@ -69,10 +69,7 @@ class Env(namedtuple('_Env', 'rib container')):
             return self.container.get(key)
         else:
             raise KeyError(key)
-    def extend(self, variables, values=None):
-        if values is None:
-            # TODO: define a different special value meaning undefined
-            values = [None for _ in variables]
+    def extend(self, variables, values):
         return Env(dict(zip(variables, values)), self)
     def __repr__(self):
         return 'Env(%r, %r)' % (self.rib, self.container)
@@ -142,7 +139,9 @@ class Seclude(object):
     def defs(self):
         return ()
     def eval(self, env, k):
-        return self.expr.eval(env.extend(self.vars), k)
+        # TODO: define a different special value meaning undefined
+        vals = [None for _ in self.vars]
+        return self.expr.eval(env.extend(self.vars, vals), k)
     def __repr__(self):
         return '{%r}' % (self.expr,)
 
