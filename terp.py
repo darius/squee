@@ -55,24 +55,27 @@ class Method(namedtuple('_Method', 'selector params expr')):
     def __repr__(self):
         return '%r: %r' % (self.params, self.expr)
 
-class Env(namedtuple('_Env', 'rib container')):
-    def adjoin(self, key, value): # for global env only
+class GlobalEnv(namedtuple('_GlobalEnv', 'rib')):
+    def adjoin(self, key, value):
         self.rib[key] = value
-    def define(self, key, value):
-        assert self.get(key) is None # XXX wait a minute...
-        assert value is not None
-        self[key] = value
     def get(self, key):
-        if key in self.rib:
-            return self.rib[key]
-        elif self.container is not None:
-            return self.container.get(key)
-        else:
-            raise KeyError(key)
+        return self.rib[key]
     def extend(self, variables, values):
         return Env(dict(zip(variables, values)), self)
     def __repr__(self):
-        return 'Env(%r, %r)' % (self.rib, self.container)
+        return 'GlobalEnv'
+
+class Env(namedtuple('_Env', 'rib container')):
+    def define(self, key, value):
+        assert key not in self.rib
+        assert value is not None
+        self[key] = value
+    def get(self, key):
+        return self.rib[key] if key in self.rib else self.container.get(key)
+    def extend(self, variables, values):
+        return Env(dict(zip(variables, values)), self)
+    def __repr__(self):
+        return 'Env(%r) / %r' % (self.rib, self.container)
 
 num_vtable = {'+': lambda rcvr, (other,), k: (k, rcvr + as_number(other)),
               '*': lambda rcvr, (other,), k: (k, rcvr * as_number(other)),
@@ -219,7 +222,7 @@ class Then(namedtuple('_Then', 'expr1 expr2')):
 def then_k(_, (self, env), k):
     return self.expr2.eval(env, k)
 
-global_env = Env({}, None)
+global_env = GlobalEnv({})
 
 bool_vtable  = {'if-so:if-not:': lambda rcvr, args, k: call(args[not rcvr], 'value', (), k)}
 
