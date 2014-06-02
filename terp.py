@@ -165,7 +165,7 @@ class Define(object):
         return '%s ::= %r' % (self,var, self.expr)
 
 def define_k(value, (env, self), k):
-    env.define(self,var, value)
+    env.define(self.var, value)
     return k, value
 
 class Actor(object):
