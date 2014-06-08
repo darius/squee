@@ -31,6 +31,8 @@ def call(receiver, selector, arguments, k):
     # TODO: handle method-missing
     return methods[selector](receiver, arguments, k)
 
+miranda_methods = {}
+
 def get_vtable(x):
     if   isinstance(x, Thing):     return x.vtable
     elif isinstance(x, bool):      return bool_vtable
@@ -74,7 +76,7 @@ undefined = object()
 class Env(namedtuple('_Env', 'rib container')):
     def define(self, key, value):
         assert self.rib.get(key) is undefined
-        self[key] = value
+        self.rib[key] = value
     def get(self, key):
         if key in self.rib:
             value = self.rib[key]
@@ -223,7 +225,7 @@ class Then(namedtuple('_Then', 'expr1 expr2')):
     def defs(self):
         return self.expr1.defs() + self.expr2.defs()
     def __repr__(self):
-        return '%r. %r' % (self.expr1, self.expr2)
+        return '%r; %r' % (self.expr1, self.expr2)
 
 def then_k(_, (self, env), k):
     return self.expr2.eval(env, k)
