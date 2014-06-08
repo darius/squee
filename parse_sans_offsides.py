@@ -64,7 +64,7 @@ def bind_simple_actor(name, (selector, params), expr): return Define(name, Actor
 
 def mk_opt_call(e, message): return message(e)
 def mk_nomessage():          return lambda e: e
-def mk_unimessage(selector): return lambda e: Call(e, selector, ())
+def mk_unimessage(selector): return lambda e: Call(e, (selector,), ())
 def mk_binmessage(opid, arg):return lambda e: Call(e, (opid,), (arg,))
 def mk_multimessage(*args):  return lambda e: Call(e, args[0::2], args[1::2])
 def mk_lit(c):    return Constant(c)
@@ -75,7 +75,7 @@ def mk_var(name): return Fetch(name)
 
 parse = Parser(parser_grammar, int=int, **globals())
 
-text1 = r"""
+text1 = """
 empty :: 
 {   is-empty: { yes }
 ;   has k:    { no }
@@ -87,7 +87,7 @@ empty ::
 ## print parse(text1)
 #. ({empty ::= {('adjoin',) ('k',): {(adjoining of k to empty)}; ('has',) ('k',): {no}; ('is-empty',): {yes}; ('merge',) ('s',): {s}}},)
 
-text2 = r"""
+text2 = """
 empty-stack ::
 {   is-empty: { yes }
 ;   top:      { complain of 'Underflow' }
@@ -105,7 +105,7 @@ push of element on stack ::
 """
 
 ## print parse(text2)
-#. ({empty-stack ::= {('is-empty',): {yes}; ('pop',): {(complain of "'Underflow'")}; ('size',): {0}; ('top',): {(complain of "'Underflow'")}}; push ::= {('of', 'on') ('element', 'stack'): {{('is-empty',): {no}; ('pop',): {stack}; ('size',): {(1 + (stack s))}; ('top',): {element}}}}},)
+#. ({empty-stack ::= {('is-empty',): {yes}; ('pop',): {(complain of "'Underflow'")}; ('size',): {0}; ('top',): {(complain of "'Underflow'")}}; push ::= {('of', 'on') ('element', 'stack'): {{('is-empty',): {no}; ('pop',): {stack}; ('size',): {(1 + (stack size))}; ('top',): {element}}}}},)
 
 ## print parse("foo of 42 + bar of 137")
 #. ({((foo of 42) + (bar of 137))},)
@@ -117,3 +117,13 @@ push of element on stack ::
 #. ({a ::= 2; (a + 3)},)
 ## trampoline(parse('a ::= 2; a + 3')[0].eval(global_env, final_k))
 #. 5
+
+text3 = """
+empty :: {
+   size: { 0 } };
+push of element on stack :: {
+   :: { size: { 1 + stack size } } };
+(push of 'a' on (push of 'b' on empty)) size
+"""
+## trampoline(parse(text3)[0].eval(global_env, final_k))
+#. 2
