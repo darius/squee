@@ -53,7 +53,11 @@ class Method(namedtuple('_Method', 'selector params expr')):
     def __call__(self, receiver, arguments, k):
         return self.expr.eval(receiver.env.extend(self.params, arguments), k)
     def __repr__(self):
-        return '%r: %r' % (self.params, self.expr)
+        if self.params:
+            head = '%s %r' % (self.selector, self.params)
+        else:
+            head = self.selector
+        return '%s: %r' % (head, self.expr)
 
 class GlobalEnv(namedtuple('_GlobalEnv', 'rib')):
     def adjoin(self, key, value):
@@ -83,11 +87,11 @@ class Env(namedtuple('_Env', 'rib container')):
     def __repr__(self):
         return 'Env(%r) / %r' % (self.rib, self.container)
 
-num_vtable = {'+': lambda rcvr, (other,), k: (k, rcvr + as_number(other)),
-              '*': lambda rcvr, (other,), k: (k, rcvr * as_number(other)),
-              '-': lambda rcvr, (other,), k: (k, rcvr - as_number(other)),
-              '=': lambda rcvr, (other,), k: (k, rcvr == other), # XXX object method
-              '<': lambda rcvr, (other,), k: (k, rcvr < other),
+num_vtable = {('+',): lambda rcvr, (other,), k: (k, rcvr + as_number(other)),
+              ('*',): lambda rcvr, (other,), k: (k, rcvr * as_number(other)),
+              ('-',): lambda rcvr, (other,), k: (k, rcvr - as_number(other)),
+              ('=',): lambda rcvr, (other,), k: (k, rcvr == other), # XXX object method
+              ('<',): lambda rcvr, (other,), k: (k, rcvr < other),
              }
 
 def as_number(thing):
@@ -99,7 +103,7 @@ def find_default(rcvr, (other, default), k):
     try:
         return k, rcvr.index(other)
     except ValueError:
-        return call(default, 'value', (), k)
+        return call(default, ('run',), (), k)
 
 def has(rcvr, (other,), k):  return (k, other in rcvr)
 def at(rcvr, (i,), k):       return (k, rcvr[i])
@@ -114,14 +118,14 @@ def as_string(thing):
         return thing
     assert False, "Not a string: %r" % (thing,)
 
-string_vtable = {'has:':  has,
-                 'at:':   at,
-                 'find:': find,
-                 'find:default:': find_default,
-                 'size':  size,
-                 '++':    add,
-                 '=':     eq,
-                 '<':     lt,
+string_vtable = {('has',):  has,
+                 ('at',):   at,
+                 ('find',): find,
+                 ('find', 'default',): find_default,
+                 ('size',): size,
+                 ('++',):   add,
+                 ('=',):    eq,
+                 ('<',):    lt,
                 }
 
 class Constant(namedtuple('_Constant', 'value')):
@@ -162,7 +166,7 @@ class Define(object):
     def eval(self, env, k):
         return self.expr.eval(env, (define_k, (env, self), k))
     def __repr__(self):
-        return '%s ::= %r' % (self,var, self.expr)
+        return '%s ::= %r' % (self.var, self.expr)
 
 def define_k(value, (env, self), k):
     env.define(self.var, value)
@@ -176,7 +180,7 @@ class Actor(object):
     def defs(self):
         return ()
     def __repr__(self):
-        return repr(sorted(self.vtable.values(), key=lambda m: m.selector))
+        return '{%s}' % '; '.join(sorted(map(repr, self.vtable.values())))
 
 class Call(namedtuple('_Call', 'subject selector operands')):
     def eval(self, env, k):
@@ -187,13 +191,13 @@ class Call(namedtuple('_Call', 'subject selector operands')):
     def __repr__(self):
         subject = repr(self.subject)
         if len(self.operands) == 0:
-            return '(%s %s)' % (subject, self.selector)
+            return '(%s %s)' % (subject, self.selector[0])
         elif len(self.operands) == 1:
-            return '(%s %s %r)' % (subject, self.selector, self.operands[0])
+            return '(%s %s %r)' % (subject, self.selector[0], self.operands[0])
         else:
-            pairs = zip(self.selector.split(':'), self.operands)
+            pairs = zip(self.selector, self.operands)
             return '(%s%s)' % (subject,
-                               ''.join(' %s: %r' % pair for pair in pairs))
+                               ''.join(' %s %r' % pair for pair in pairs))
 
 def evrands_k(subject, (self, env), k):
     return evrands(self.operands, env, (call_k, (subject, self), k))
@@ -226,7 +230,7 @@ def then_k(_, (self, env), k):
 
 global_env = GlobalEnv({})
 
-bool_vtable  = {'if-so:if-not:': lambda rcvr, args, k: call(args[not rcvr], 'value', (), k)}
+bool_vtable  = {('if-so', 'if-not'): lambda rcvr, args, k: call(args[not rcvr], ('run',), (), k)}
 
 global_env.adjoin('no',  False)
 global_env.adjoin('yes', True)
@@ -236,23 +240,23 @@ final_k = None
 
 # Testing
 
-smoketest_expr = Call(Constant(2), '+', (Constant(3),))
+smoketest_expr = Call(Constant(2), ('+',), (Constant(3),))
 smoketest = smoketest_expr.eval(None, final_k)
 ## trampoline(smoketest)
 #. 5
 
 def emblock(expr):
-    return Actor([Method('value', (), expr)])
+    return Actor([Method(('run',), (), expr)])
 
-factorial_body = Call(Call(Fetch('n'), '=', (Constant(0),)),
-                      'if-so:if-not:',
+factorial_body = Call(Call(Fetch('n'), ('=',), (Constant(0),)),
+                      ('if-so', 'if-not'),
                       (emblock(Constant(1)),
                        emblock( # n * (factorial of: (n - 1))
-                           Call(Fetch('n'), '*',
-                                (Call(Fetch('factorial'), 'of:',
-                                      (Call(Fetch('n'), '-', (Constant(1),)),)),)))))
-factorial = Actor([Method('of:', ('n',), factorial_body)])
+                           Call(Fetch('n'), ('*',),
+                                (Call(Fetch('factorial'), ('of',),
+                                      (Call(Fetch('n'), ('-',), (Constant(1),)),)),)))))
+factorial = Actor([Method(('of',), ('n',), factorial_body)])
 global_env.adjoin('factorial', trampoline(factorial.eval(global_env, final_k)))
-try_factorial = Call(Fetch('factorial'), 'of:', (Constant(5),))
+try_factorial = Call(Fetch('factorial'), ('of',), (Constant(5),))
 ## trampoline(try_factorial.eval(global_env, final_k))
 #. 120
