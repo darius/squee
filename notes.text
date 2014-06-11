@@ -183,5 +183,7 @@ tuples-of-strings as the cues. Some advantages:
     what they'll be bound to at runtime).
   * There's less call for inheritance/Miranda methods, because the
     generic function can have a default behavior.
+  * Synergy 'for free', already given by the dispatch mechanism?
+    I'm not sure about this or if it's an advantage to me.
 With a little creative language design they could still take keyword
 arguments Smalltalk-style instead of the Scheme-style positional args.
