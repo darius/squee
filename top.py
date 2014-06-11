@@ -3,9 +3,10 @@ Top level of the system.
 """
 
 from core import call, trampoline, final_k
+import primitives; primitives.install()
 from environments import GlobalEnv
 import absyntax as A
-import primitives; primitives.install()
+from parse_sans_offsides import parse
 
 global_env = GlobalEnv({})
 
@@ -15,23 +16,21 @@ global_env.adjoin('yes', True)
 
 # Testing
 
-smoketest_expr = A.Call(A.Constant(2), ('+',), (A.Constant(3),))
-smoketest = smoketest_expr.eval(None, final_k)
-## trampoline(smoketest)
+def run(text):
+    expr, = parse(text)
+    return trampoline(expr.eval(global_env, final_k))
+
+## run('42')
+#. 42
+## run('2 + 3')
 #. 5
 
-def emblock(expr):
-    return A.Actor([A.Method(('run',), (), expr)])
-
-factorial_body = A.Call(A.Call(A.Fetch('n'), ('=',), (A.Constant(0),)),
-                      ('if-so', 'if-not'),
-                      (emblock(A.Constant(1)),
-                       emblock( # n * (factorial of: (n - 1))
-                           A.Call(A.Fetch('n'), ('*',),
-                                (A.Call(A.Fetch('factorial'), ('of',),
-                                      (A.Call(A.Fetch('n'), ('-',), (A.Constant(1),)),)),)))))
-factorial = A.Actor([A.Method(('of',), ('n',), factorial_body)])
-global_env.adjoin('factorial', trampoline(factorial.eval(global_env, final_k)))
-try_factorial = A.Call(A.Fetch('factorial'), ('of',), (A.Constant(5),))
-## trampoline(try_factorial.eval(global_env, final_k))
+fact = """
+factorial of n :: {
+   (0 = n) if-so  (then run :: { 1 })
+           if-not (else run :: { n * (factorial of (n - 1)) })
+};
+factorial of 5
+"""
+## run(fact)
 #. 120
