@@ -1,3 +1,5 @@
+To do: make binary operators associate left-to-right, so 3 - 2 - 1 = 0
+
 Maybe take syntax inspiration from that "config file for humans"
 proposal from that github guy. That was in reaction to the YAML
 vulnerabilities.
@@ -36,6 +38,8 @@ I judge this almost a good idea, marred by the confusion we'd get from
 variable-names-also-with-dashes.
 (So, another idea: receiver .keyword1 arg1 .keyword2 arg2)
 But let's give it a chance.
+
+http://www.haskell.org/onlinereport/lexemes.html#lexemes-layout
 
 
 How about a rights-amplification primitive?
@@ -149,3 +153,24 @@ How about capital-letters-mean-variables?
                               if-not: On-not run
           if-not:
               On-not run
+
+Another metaphor: signet and seal. A signet forms a seal upon a
+thing, which you recognize/remove with ???
+
+
+
+
+For Lisp-syntax Loo, where sends look like (.foo receiver) or maybe
+('foo receiver), we currently define the methods in this way:
+(make me
+  (foo () "Here's your foo")
+  (bar (x) (* 2 x)))
+If we defined them this way instead:
+(make me
+  ('foo () "Here's your foo")
+  ('bar (x) (* 2 x)))
+then they wouldn't just look more like the call sites, there would
+also be a natural syntax for a catch-all method:
+(make me
+  ('foo () "Here's your foo")
+  (cue arguments `(You sent `(',cue ,me ,@arguments))))
