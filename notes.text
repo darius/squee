@@ -174,3 +174,14 @@ also be a natural syntax for a catch-all method:
 (make me
   ('foo () "Here's your foo")
   (cue arguments `(You sent `(',cue ,me ,@arguments))))
+
+
+Consider T-style generic functions instead of the current scheme of
+tuples-of-strings as the cues. Some advantages:
+  * The IDE can help showing/editing cue names, because in a correct
+    program they have to be in scope (even if the IDE doesn't know
+    what they'll be bound to at runtime).
+  * There's less call for inheritance/Miranda methods, because the
+    generic function can have a default behavior.
+With a little creative language design they could still take keyword
+arguments Smalltalk-style instead of the Scheme-style positional args.
