@@ -5,7 +5,6 @@ Top level of the system.
 from core import call, trampoline, final_k
 import primitives; primitives.install()
 from environments import GlobalEnv
-import absyntax as A
 from parse_sans_offsides import parse
 
 def run(text):
