@@ -25,18 +25,18 @@ class Method(namedtuple('_Method', 'selector params expr')):
         return '%s: %r' % (head, self.expr)
 
 class Constant(namedtuple('_Constant', 'value')):
-    def eval(self, env, k):
-        return k, self.value
     def defs(self):
         return ()
+    def eval(self, env, k):
+        return k, self.value
     def __repr__(self):
         return repr(self.value)
 
 class Fetch(namedtuple('_Fetch', 'name')):
-    def eval(self, env, k):
-        return k, env.get(self.name)
     def defs(self):
         return ()
+    def eval(self, env, k):
+        return k, env.get(self.name)
     def __repr__(self):
         return str(self.name)
 
@@ -71,19 +71,19 @@ def define_k(value, (env, self), k):
 class Actor(object):
     def __init__(self, methods):
         self.vtable = {method.selector: method for method in methods}
-    def eval(self, env, k):
-        return k, Thing(env, self.vtable)
     def defs(self):
         return ()
+    def eval(self, env, k):
+        return k, Thing(env, self.vtable)
     def __repr__(self):
         return '{%s}' % '; '.join(sorted(map(repr, self.vtable.values())))
 
 class Call(namedtuple('_Call', 'subject selector operands')):
-    def eval(self, env, k):
-        return self.subject.eval(env, (evrands_k, (self, env), k))
     def defs(self):
         return sum((expr.defs() for expr in (self.subject,) + self.operands),
                    ())
+    def eval(self, env, k):
+        return self.subject.eval(env, (evrands_k, (self, env), k))
     def __repr__(self):
         subject = repr(self.subject)
         if len(self.operands) == 0:
@@ -114,10 +114,10 @@ def evrands_cons_k(vals, val, k):
     return k, (val,)+vals
 
 class Then(namedtuple('_Then', 'expr1 expr2')):
-    def eval(self, env, k):
-        return self.expr1.eval(env, (then_k, (self, env), k))
     def defs(self):
         return self.expr1.defs() + self.expr2.defs()
+    def eval(self, env, k):
+        return self.expr1.eval(env, (then_k, (self, env), k))
     def __repr__(self):
         return '%r; %r' % (self.expr1, self.expr2)
 
