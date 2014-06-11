@@ -3,8 +3,8 @@ A version of the parser setting aside the indent-sensitive part, for now.
 """
 
 from peglet import Parser, join
-from terp import (Constant, Fetch, Actor, Call, Then, Define, Seclude,
-                  Method, global_env, trampoline, final_k)
+from absyntax import Constant, Fetch, Actor, Call, Then, Define, Seclude, Method
+## from top import global_env, trampoline, final_k
 
 parser_grammar = r"""
 program        = _ sequence !.             mk_body
