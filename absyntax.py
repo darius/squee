@@ -1,0 +1,125 @@
+"""
+AST interpreter
+"""
+
+from collections import namedtuple
+
+from core import call
+from environments import extend, undefined
+
+class Thing(object):
+    def __init__(self, env, vtable):
+        self.env = env
+        self.vtable = vtable
+    def __repr__(self):
+        return '<%r %r>' % (self.env, self.vtable)
+
+class Method(namedtuple('_Method', 'selector params expr')):
+    def __call__(self, receiver, arguments, k):
+        return self.expr.eval(extend(receiver.env, self.params, arguments), k)
+    def __repr__(self):
+        if self.params:
+            head = '%s %r' % (self.selector, self.params)
+        else:
+            head = self.selector
+        return '%s: %r' % (head, self.expr)
+
+class Constant(namedtuple('_Constant', 'value')):
+    def eval(self, env, k):
+        return k, self.value
+    def defs(self):
+        return ()
+    def __repr__(self):
+        return repr(self.value)
+
+class Fetch(namedtuple('_Fetch', 'name')):
+    def eval(self, env, k):
+        return k, env.get(self.name)
+    def defs(self):
+        return ()
+    def __repr__(self):
+        return str(self.name)
+
+class Seclude(object):
+    def __init__(self, expr):
+        self.expr = expr
+        self.vars = expr.defs()
+        assert len(set(self.vars)) == len(self.vars)
+    def defs(self):
+        return ()
+    def eval(self, env, k):
+        vals = [undefined for _ in self.vars]
+        return self.expr.eval(extend(env, self.vars, vals), k)
+    def __repr__(self):
+        return '{%r}' % (self.expr,)
+
+class Define(object):
+    def __init__(self, var, expr):
+        self.var = var
+        self.expr = expr
+    def defs(self):
+        return (self.var,)
+    def eval(self, env, k):
+        return self.expr.eval(env, (define_k, (env, self), k))
+    def __repr__(self):
+        return '%s ::= %r' % (self.var, self.expr)
+
+def define_k(value, (env, self), k):
+    env.define(self.var, value)
+    return k, value
+
+class Actor(object):
+    def __init__(self, methods):
+        self.vtable = {method.selector: method for method in methods}
+    def eval(self, env, k):
+        return k, Thing(env, self.vtable)
+    def defs(self):
+        return ()
+    def __repr__(self):
+        return '{%s}' % '; '.join(sorted(map(repr, self.vtable.values())))
+
+class Call(namedtuple('_Call', 'subject selector operands')):
+    def eval(self, env, k):
+        return self.subject.eval(env, (evrands_k, (self, env), k))
+    def defs(self):
+        return sum((expr.defs() for expr in (self.subject,) + self.operands),
+                   ())
+    def __repr__(self):
+        subject = repr(self.subject)
+        if len(self.operands) == 0:
+            return '(%s %s)' % (subject, self.selector[0])
+        elif len(self.operands) == 1:
+            return '(%s %s %r)' % (subject, self.selector[0], self.operands[0])
+        else:
+            pairs = zip(self.selector, self.operands)
+            return '(%s%s)' % (subject,
+                               ''.join(' %s %r' % pair for pair in pairs))
+
+def evrands_k(subject, (self, env), k):
+    return evrands(self.operands, env, (call_k, (subject, self), k))
+
+def call_k(arguments, (subject, self), k):
+    return call(subject, self.selector, arguments, k)
+
+def evrands(operands, env, k):
+    if not operands:
+        return k, ()
+    else:
+        return operands[0].eval(env, (evrands_more_k, (operands[1:], env), k))
+
+def evrands_more_k(val, (operands, env), k):
+    return evrands(operands, env, (evrands_cons_k, val, k))
+
+def evrands_cons_k(vals, val, k):
+    return k, (val,)+vals
+
+class Then(namedtuple('_Then', 'expr1 expr2')):
+    def eval(self, env, k):
+        return self.expr1.eval(env, (then_k, (self, env), k))
+    def defs(self):
+        return self.expr1.defs() + self.expr2.defs()
+    def __repr__(self):
+        return '%r; %r' % (self.expr1, self.expr2)
+
+def then_k(_, (self, env), k):
+    return self.expr2.eval(env, k)
