@@ -8,6 +8,10 @@ from environments import GlobalEnv
 import absyntax as A
 from parse_sans_offsides import parse
 
+def run(text):
+    expr, = parse(text)
+    return trampoline(expr.eval(global_env, final_k))
+
 global_env = GlobalEnv({})
 
 global_env.adjoin('no', False)
@@ -15,10 +19,6 @@ global_env.adjoin('yes', True)
 
 
 # Testing
-
-def run(text):
-    expr, = parse(text)
-    return trampoline(expr.eval(global_env, final_k))
 
 ## run('42')
 #. 42
