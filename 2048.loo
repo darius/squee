@@ -1,0 +1,139 @@
+-- Won't run yet. See below.
+
+twenty48 play ::
+   play ing board ::
+      heading   ::= 'Use the arrow keys, or Q to quit.\n\n'
+      game-over ::= [up,down,left,right] all `move: (move of board) is-empty
+      score     ::= (board is-won) if-so: 'You win!'
+                                   if-not: game-over if-so: 'You lose!'
+                                                     if-not: ''
+      ui render [heading, board view, score, '\n']
+      game-over if-so: 'done'
+         if-not:
+            key ::= ui get-key
+            (key upper = 'Q') if-so: 'done'
+               if-not:
+                  (commands has key)
+                     if-not: play ing board
+                     if-so:
+                        sliding ::= (commands at key) of board
+                        (sliding is-empty)
+                           if-so: play ing board
+                           if-not:
+                              sliding for-each `frame:
+                                 ui render [heading, frame view, score]
+                                 ui sleep 0.04
+                              new-v ::= (random random < .9) if-so:  2
+                                                             if-not: 4
+                              play ing ((sliding last) plop new-v)
+
+   play ing ((empty-board plop 2) plop 2)
+
+make-board of rows ::
+   collect empties ::
+      poses = [] thaw
+      (0 .. 4) for-each `r:
+         (0 .. 4) for-each `c:
+            (0 = ((rows at r) at c)) if-so: poses append [r,c]
+      poses freeze
+
+   board ::
+
+      is-won:
+         rows any `row: row any `v: 2048 <= v
+
+      slide-left:
+         (slide-left of rows) map make-board
+
+      plop v:
+         pos ::= random choice (collect empties)
+         board at pos put v
+
+      at pos put v:
+         (0 .. 4) map `r:
+            (0 .. 4) map `c:
+               (pos = [r,c]) if-so:  v
+                             if-not: (rows at r) at c
+
+      view:
+         grid ::= rows map `row:
+                     row map `v:
+                        [' ', (v as-string) center-in 4]))
+         [grid, '\n\n']
+
+slide-left of rows ::
+   snaps ::= [] thaw      
+   slid ing sliders ::
+      (sliders all `s: s is-fixed)
+         if-so:  snaps freeze
+         if-not: snaps append (sliders map `s: s snapshot)
+                 slid ing (sliders map `s: s slide)
+   slid ing (rows map make-slider)
+
+make-slider :: 
+   of row:
+      make-slider lo 0 row row
+   lo lo row row:
+      ::
+         is-fixed: 4 = lo
+         snapshot: row
+         slide:
+            (lo .. 3) find `i: (row at i = 0) != (row at i = row at (i+1))
+                      if-present `i:
+                         sum ::= row at i + row at (i+1)
+                         make-slider lo ((row at i = 0) if-so:  lo
+                                                        if-not: i+1)
+                                     row (row up-to i ++ [sum] ++ row from (i+2) ++ [0])
+                      if-absent:
+                         make-slider lo 4 row row
+
+slide-right of rows :: conjugate of slide-left  of rows by fliph
+slide-up    of rows :: conjugate of slide-left  of rows by flipd
+slide-down  of rows :: conjugate of slide-right of rows by flipd
+
+conjugate of slide of rows by flip :: (slide of (flip of rows)) map flip
+
+flipd of rows :: rows transpose   -- OK, kind of cheating
+fliph of nows :: rows map `row: row reverse
+
+empty-board ::= make-board of (([0] * 4) * 4)
+
+left of board :: board slide-left
+
+temp ::= empty-dict thaw
+temp at 'left'  put left
+temp at 'right' put right
+temp at 'up'    put up
+temp at 'down'  put down
+commands ::= temp freeze
+
+
+-- TODO
+-- rewrite in terms of an event loop
+-- maybe the board would be simpler as a flat list
+-- make it easy to vary the board size
+
+-- offsides rule
+-- ui render scene, ui get-key, ui sleep interval
+-- random random, random choice
+-- bool if-so
+-- num as-string, num <= n
+-- string center-in n
+-- num .. num -> range (I think this should be inclusive instead, though... give exclusive another name)
+-- range for-each fn, range map fn, range find fn if-present fn if-absent fn
+-- \n in string literals (or a newline variable)
+-- list literals (tuples actually)
+-- list all test, list any test
+     (different names: always, sometimes? for-all, for-some? has-some?)
+-- list for-each fn, list map fn, list enumerate, list * n, list reverse, list conj
+-- list at n, list up-to n, list from n, list last
+--    (rename 'up-to' to 'preceding' or 'before' or something?)
+-- tuple thaw, list append, list freeze [reverting to python names for types, here]
+-- rename freeze -> snapshot? then what do we call thaw?
+-- dict thaw, dict freeze, dict at k put v, dict at k, dict has k
+-- dict literals!
+
+-- XXX I'm pretty sure I'm offsides-formatting wrong.
+-- Need to keep the block to the right of the ':'.
+-- Or else change how offsides is going to work.
+-- (I think I'm misremembering, and this'll be OK...)
