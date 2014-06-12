@@ -24,6 +24,19 @@ global_env.adjoin('yes', True)
 ## run('2 + 3')
 #. 5
 
+## run('a ::= 2; a + 3')
+#. 5
+
+text3 = """
+empty :: {
+   size: { 0 } };
+push of element on stack :: {
+   :: { size: { 1 + stack size } } };
+(push of 'a' on (push of 'b' on empty)) size
+"""
+## run(text3)
+#. 2
+
 fact = """
 factorial of n :: {
    (0 = n) if-so:  { 1 }

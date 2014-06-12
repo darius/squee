@@ -97,7 +97,7 @@ empty ::
 }
 """
 
-## print parse(text1)
+## parse(text1)
 #. ({empty ::= {('adjoin',) ('k',): {(adjoining of k to empty)}; ('has',) ('k',): {no}; ('is-empty',): {yes}; ('merge',) ('s',): {s}}},)
 
 text2 = """
@@ -117,26 +117,11 @@ push of element on stack ::
 }  }
 """
 
-## print parse(text2)
+## parse(text2)
 #. ({empty-stack ::= {('is-empty',): {yes}; ('pop',): {(complain of "'Underflow'")}; ('size',): {0}; ('top',): {(complain of "'Underflow'")}}; push ::= {('of', 'on') ('element', 'stack'): {{('is-empty',): {no}; ('pop',): {stack}; ('size',): {(1 + (stack size))}; ('top',): {element}}}}},)
 
-## print parse("foo of 42 + bar of 137")
+## parse("foo of 42 + bar of 137")
 #. ({((foo of 42) + (bar of 137))},)
-
-## trampoline(parse('2 + 3')[0].eval(global_env, final_k))
-#. 5
 
 ## parse('a ::= 2; a + 3')
 #. ({a ::= 2; (a + 3)},)
-## trampoline(parse('a ::= 2; a + 3')[0].eval(global_env, final_k))
-#. 5
-
-text3 = """
-empty :: {
-   size: { 0 } };
-push of element on stack :: {
-   :: { size: { 1 + stack size } } };
-(push of 'a' on (push of 'b' on empty)) size
-"""
-## trampoline(parse(text3)[0].eval(global_env, final_k))
-#. 2
