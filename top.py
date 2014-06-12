@@ -26,8 +26,8 @@ global_env.adjoin('yes', True)
 
 fact = """
 factorial of n :: {
-   (0 = n) if-so  (then run :: { 1 })
-           if-not (else run :: { n * (factorial of (n - 1)) })
+   (0 = n) if-so:  { 1 }
+           if-not: { n * (factorial of (n - 1)) }
 };
 factorial of 5
 """
