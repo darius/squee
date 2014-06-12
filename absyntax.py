@@ -14,14 +14,14 @@ class Thing(object):
     def __repr__(self):
         return '<%r %r>' % (self.env, self.vtable)
 
-class Method(namedtuple('_Method', 'selector params expr')):
+class Method(namedtuple('_Method', 'cue params expr')):
     def __call__(self, receiver, arguments, k):
         return self.expr.eval(extend(receiver.env, self.params, arguments), k)
     def __repr__(self):
         if self.params:
-            head = '%s %r' % (self.selector, self.params)
+            head = '%s %r' % (self.cue, self.params)
         else:
-            head = self.selector
+            head = self.cue
         return '%s: %r' % (head, self.expr)
 
 class Constant(namedtuple('_Constant', 'value')):
@@ -70,7 +70,7 @@ def define_k(value, (env, self), k):
 
 class Actor(object):
     def __init__(self, methods):
-        self.vtable = {method.selector: method for method in methods}
+        self.vtable = {method.cue: method for method in methods}
     def defs(self):
         return ()
     def eval(self, env, k):
@@ -78,7 +78,7 @@ class Actor(object):
     def __repr__(self):
         return '{%s}' % '; '.join(sorted(map(repr, self.vtable.values())))
 
-class Call(namedtuple('_Call', 'subject selector operands')):
+class Call(namedtuple('_Call', 'subject cue operands')):
     def defs(self):
         return sum((expr.defs() for expr in (self.subject,) + self.operands),
                    ())
@@ -87,11 +87,11 @@ class Call(namedtuple('_Call', 'subject selector operands')):
     def __repr__(self):
         subject = repr(self.subject)
         if len(self.operands) == 0:
-            return '(%s %s)' % (subject, self.selector[0])
+            return '(%s %s)' % (subject, self.cue[0])
         elif len(self.operands) == 1:
-            return '(%s %s %r)' % (subject, self.selector[0], self.operands[0])
+            return '(%s %s %r)' % (subject, self.cue[0], self.operands[0])
         else:
-            pairs = zip(self.selector, self.operands)
+            pairs = zip(self.cue, self.operands)
             return '(%s%s)' % (subject,
                                ''.join(' %s %r' % pair for pair in pairs))
 
@@ -99,7 +99,7 @@ def evrands_k(subject, (self, env), k):
     return evrands(self.operands, env, (call_k, (subject, self), k))
 
 def call_k(arguments, (subject, self), k):
-    return call(subject, self.selector, arguments, k)
+    return call(subject, self.cue, arguments, k)
 
 def evrands(operands, env, k):
     if not operands:
