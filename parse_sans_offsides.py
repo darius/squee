@@ -9,7 +9,8 @@ parser_grammar = r"""
 program        = _ sequence !.             mk_body
 
 sequence       = big opt_sequence
-opt_sequence   = ; _ sequence | 
+opt_sequence   = ; _ sequence
+               | 
 
 big            = make
                | id ::= _ big              Define
@@ -19,7 +20,8 @@ make           = id method_decl :: _ body  bind_simple_actor
                | id :: _ actor             Define
                | :: _ actor
 actor          = { _ method methods } _    mk_actor
-methods        = ; _ method methods | 
+methods        = ; _ method methods
+               | 
 method         = method_decl : _ body      mk_method
 body           = { _ sequence } _          mk_body
 
