@@ -21,11 +21,11 @@ global_env.adjoin('yes', True)
 
 ## run('42')
 #. 42
-## run('2 + 3')
+## run('2+3')
 #. 5
 
-## run('a ::= 2; a + 3')
-#. 5
+## run('a ::= 2; a * 3')
+#. 6
 
 text3 = """
 empty :: {
