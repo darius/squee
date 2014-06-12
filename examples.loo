@@ -13,9 +13,9 @@ adjoining of n to s ::
       if-not:
          extension ::
             is-empty: no
-            has k:    n == k
+            has k:    n == k ||: s has k
             adjoin k: adjoining of k to extension
-            merge s:  merging of extension with s
+            merge t:  merging of extension with t
 
 merging of s1 with s2 ::
    meld ::

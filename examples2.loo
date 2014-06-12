@@ -17,7 +17,7 @@ Adjoining of N to S ::
       if-not:
          Extension ::
             is-empty: No
-            has K:    N == K
+            has K:    N == K ||: S has K
             adjoin K: Adjoining of K to Extension
             merge S:  Merging of Extension with S
 

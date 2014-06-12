@@ -22,10 +22,10 @@ adjoining n s ::
    s has n,
       if: s                 -- This syntax is pretty fuggly here
           extension ::
-             is-empty: no
+             is-empty: no ||: s has k
              has k:    n == k
              adjoin k: adjoining k extension
-             merge s:  merging extension s
+             merge t:  merging extension t
 
 merging s1 s2:
    meld ::
