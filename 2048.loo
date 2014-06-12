@@ -42,8 +42,10 @@ make-board of rows ::
       is-won:
          rows any `row: row any `v: 2048 <= v
 
-      slide-left:
-         (slide-left of rows) map make-board
+      slide-left:  (slide-left  of rows) map make-board
+      slide-right: (slide-right of rows) map make-board
+      slide-up:    (slide-up    of rows) map make-board
+      slide-down:  (slide-down  of rows) map make-board
 
       plop v:
          pos ::= random choice (collect empties)
@@ -98,7 +100,11 @@ fliph of nows :: rows map `row: row reverse
 
 empty-board ::= make-board of (([0] * 4) * 4)
 
-left of board :: board slide-left
+-- Too repetitious!
+left  of board :: board slide-left
+right of board :: board slide-right
+up    of board :: board slide-up
+down  of board :: board slide-down
 
 temp ::= empty-dict thaw
 temp at 'left'  put left
