@@ -80,12 +80,15 @@ def mk_unimessage(cue):      return lambda e: Call(e, (cue,), ())
 def mk_binmessage(opid, arg):return lambda e: Call(e, (opid,), (arg,))
 def mk_multimessage(*args):  return lambda e: Call(e, args[0::2], args[1::2])
 
+parse = Parser(parser_grammar, int=int, **globals())
+
+
+# Smoke test
+
 ## parse('adjoining of (k + 5) to empty')
 #. ({(adjoining of (k + 5) to empty)},)
 ## parse(': { 1 }')
 #. ({{('run',): {1}}},)
-
-parse = Parser(parser_grammar, int=int, **globals())
 
 text1 = """
 empty :: 
