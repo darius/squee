@@ -7,23 +7,6 @@ from collections import namedtuple
 from core import call
 from environments import extend, undefined
 
-class Thing(object):
-    def __init__(self, env, vtable):
-        self.env = env
-        self.vtable = vtable
-    def __repr__(self):
-        return '<%r %r>' % (self.env, self.vtable)
-
-class Method(namedtuple('_Method', 'cue params expr')):
-    def __call__(self, receiver, arguments, k):
-        return self.expr.eval(extend(receiver.env, self.params, arguments), k)
-    def __repr__(self):
-        if self.params:
-            head = '%s %r' % (self.cue, self.params)
-        else:
-            head = self.cue
-        return '%s: %r' % (head, self.expr)
-
 class Constant(namedtuple('_Constant', 'value')):
     def defs(self):
         return ()
@@ -39,6 +22,17 @@ class Fetch(namedtuple('_Fetch', 'name')):
         return k, env.get(self.name)
     def __repr__(self):
         return str(self.name)
+
+class Then(namedtuple('_Then', 'expr1 expr2')):
+    def defs(self):
+        return self.expr1.defs() + self.expr2.defs()
+    def eval(self, env, k):
+        return self.expr1.eval(env, (then_k, (self, env), k))
+    def __repr__(self):
+        return '%r; %r' % (self.expr1, self.expr2)
+
+def then_k(_, (self, env), k):
+    return self.expr2.eval(env, k)
 
 class Seclude(object):
     def __init__(self, expr):
@@ -78,6 +72,23 @@ class Actor(object):
     def __repr__(self):
         return '{%s}' % '; '.join(sorted(map(repr, self.vtable.values())))
 
+class Method(namedtuple('_Method', 'cue params expr')):
+    def __call__(self, receiver, arguments, k):
+        return self.expr.eval(extend(receiver.env, self.params, arguments), k)
+    def __repr__(self):
+        if self.params:
+            head = '%s %r' % (self.cue, self.params)
+        else:
+            head = self.cue
+        return '%s: %r' % (head, self.expr)
+
+class Thing(object):
+    def __init__(self, env, vtable):
+        self.env = env
+        self.vtable = vtable
+    def __repr__(self):
+        return '<%r %r>' % (self.env, self.vtable)
+
 class Call(namedtuple('_Call', 'subject cue operands')):
     def defs(self):
         return sum((expr.defs() for expr in (self.subject,) + self.operands),
@@ -112,14 +123,3 @@ def evrands_more_k(val, (operands, env), k):
 
 def evrands_cons_k(vals, val, k):
     return k, (val,)+vals
-
-class Then(namedtuple('_Then', 'expr1 expr2')):
-    def defs(self):
-        return self.expr1.defs() + self.expr2.defs()
-    def eval(self, env, k):
-        return self.expr1.eval(env, (then_k, (self, env), k))
-    def __repr__(self):
-        return '%r; %r' % (self.expr1, self.expr2)
-
-def then_k(_, (self, env), k):
-    return self.expr2.eval(env, k)
