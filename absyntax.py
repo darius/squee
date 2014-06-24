@@ -60,7 +60,7 @@ class Define(object):
 
 def define_k(value, (env, self), k):
     env.define(self.var, value)
-    return k, value
+    return k, None
 
 class Actor(object):
     def __init__(self, methods):
