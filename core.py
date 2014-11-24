@@ -25,11 +25,11 @@ def traceback(state):
 
 def call(receiver, selector, arguments, k):
     try:                   methods = receiver.vtable
-    except AttributeError: methods = vtables[type(receiver)]
+    except AttributeError: methods = primitive_vtables[type(receiver)]
     method = methods.get(selector)
     if method is None:
         method = miranda_methods[selector] # TODO: handle method-missing
     return method(receiver, arguments, k)
 
-vtables = {}
+primitive_vtables = {}
 miranda_methods = {}

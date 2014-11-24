@@ -2,13 +2,13 @@
 Adapt some Python types to the core protocol.
 """
 
-from core import call, vtables
+from core import call, primitive_vtables
 
 def install():
-    vtables[type(None)] = {}
-    vtables[bool]  = bool_vtable
-    for t in num_types: vtables[t] = num_vtable
-    for t in str_types: vtables[t] = str_vtable
+    primitive_vtables[type(None)] = {}
+    primitive_vtables[bool]  = bool_vtable
+    for t in num_types: primitive_vtables[t] = num_vtable
+    for t in str_types: primitive_vtables[t] = str_vtable
 
 str_types = (str, unicode)
 num_types = (int, long, float)
