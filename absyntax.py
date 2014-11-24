@@ -42,7 +42,7 @@ class Then(namedtuple('_Then', 'expr1 expr2')):
 def then_k(_, (self, env), k):
     return self.expr2.eval(env, k)
 
-class Seclude(object):
+class Nest(object):
     vtable = expr_vtable
     def __init__(self, expr):
         self.expr = expr

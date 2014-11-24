@@ -7,7 +7,7 @@ Abstract syntax, with expressions e, variables v, constants c:
              | Call e selector [e]     array at i put x
              | Actor [method] e        :: double n; 2 * n
              | Define v e              answer ::= 42
-             | Seclude e               foo; bar
+             | Nest e                  foo; bar
              | Then e1 e2              foo; bar
     method   = Method selector [v] e
     selector = [string] -- XXX arity 0/1 both imply selector has length 1...
@@ -16,9 +16,9 @@ A Then evaluates its subexpressions in order and returns the last
 value.
 
 A Define expression evaluates to what its subexpression evaluates to.
-The scope of the variable is the whole Seclude it's defined in;
+The scope of the variable is the whole Nest it's defined in;
 if it's referenced before it's bound, an error is raised.
-(Seclude was called 'block' in Algol-60; it's renamed here to avoid
+(Nest was called 'block' in Algol-60; it's renamed here to avoid
 confusion with Smalltalk blocks.)
 
 In Actor the last e should evaluate to a block with selector and

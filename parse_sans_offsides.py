@@ -3,7 +3,7 @@ A version of the parser setting aside the indent-sensitive part, for now.
 """
 
 from peglet import Parser, hug, join
-from absyntax import Constant, Fetch, Actor, Call, Then, Define, Seclude, Method
+from absyntax import Constant, Fetch, Actor, Call, Then, Define, Nest, Method
 
 parser_grammar = r"""
 program        = _ sequence !.             mk_body
@@ -74,7 +74,7 @@ def bind_simple_actor(name, (cue, params), expr):
 def mk_method((cue, params), expr):
     return Method(cue, params, expr)
 
-def mk_body(*exprs):         return Seclude(reduce(Then, exprs))
+def mk_body(*exprs):         return Nest(reduce(Then, exprs))
 def mk_method_decl(*parts):  return (parts[0::2], parts[1::2])
 
 def mk_opt_call(e, message): return message(e)
