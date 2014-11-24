@@ -45,7 +45,7 @@ tiny    = number                     int mk_lit
 
 id       = ([A-Za-z][_A-Za-z0-9-]*) _
 number   = (-?\d+)                  _  
-string   = ('(?:''|[^'])*')         _  
+string   = '((?:''|[^'])*)'         _  
 _ = \s*
 """
 
@@ -235,9 +235,9 @@ make-sokoboard of initial-grid ::
 #. ;       if-not : { 
 #.           extension :: { 
 #.              is-empty : no 
-#. ;             has k : n == k 
+#. ;             has k : n == k || : s has k 
 #. ;             adjoin k : adjoining of k to extension 
-#. ;             merge s : merging of extension with s } 
+#. ;             merge t : merging of extension with t } 
 #.           } 
 #.        } 
 #.     } 
