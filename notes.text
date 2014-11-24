@@ -194,6 +194,7 @@ call verb, which could be generic on subject, or not.
 
 
 More syntax musing:
+
 What if 'f x' (juxtaposition) is a call (like E's f.run(x))
 while keyword arguments become slightly heavier to express
 (not sure how, exactly)?
@@ -201,6 +202,16 @@ while keyword arguments become slightly heavier to express
 Maybe: f . x   -- for a simple function call
        actor .say 'Hello' .to alice   -- for a method call
        actor .exit ()                 -- a no-arg method call (ugh-ish)
+
+Yet another random idea: What probably bugs me the most in the current
+syntax is all the noise words like 'of' in examples like 'push of x on
+stack'. What if you could write '. push x on stack' and that's just
+syntactic sugar? Two ways this might work: (1) the syntactical *method
+name* here ('push on') is looked up as the *variable name* in the
+scope, then a generic method name is called on it with the arguments.
+Or (2) 'push' is still the variable name, and we transform the method
+name actually called.
+
 
 read
 http://julesjacobs.github.io/2014/10/18/the-best-collections-library-design-2.html
