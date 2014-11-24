@@ -198,5 +198,9 @@ What if 'f x' (juxtaposition) is a call (like E's f.run(x))
 while keyword arguments become slightly heavier to express
 (not sure how, exactly)?
 
+Maybe: f . x   -- for a simple function call
+       actor .say 'Hello' .to alice   -- for a method call
+       actor .exit ()                 -- a no-arg method call (ugh-ish)
+
 read
 http://julesjacobs.github.io/2014/10/18/the-best-collections-library-design-2.html
