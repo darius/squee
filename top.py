@@ -15,12 +15,21 @@ global_env = GlobalEnv({})
 
 global_env.adjoin('no', False)
 global_env.adjoin('yes', True)
+global_env.adjoin('nil', ())
+global_env.adjoin('global-environment', global_env)
+
+class MakeList(object):
+    entuple = lambda rcvr, args, k: (k, args)
+    vtable = {('of',): entuple,
+              ('of','and'): entuple,
+              ('of','and','and'): entuple}
+
+global_env.adjoin('make-list', MakeList())
 
 class Parse(object):
     vtable = {('of',): lambda rcvr, (text,), k: (k, parse(primitives.as_string(text))[0])}
 
 global_env.adjoin('parse', Parse())
-global_env.adjoin('global-environment', global_env)
 
 
 # Testing
@@ -33,14 +42,14 @@ global_env.adjoin('global-environment', global_env)
 ## run('a ::= 2; a * 3')
 #. 6
 
-text3 = """
+eg_stack = """
 empty :: {
    size: { 0 } };
 push of element on stack :: {
    :: { size: { 1 + stack size } } };
 (push of 'a' on (push of 'b' on empty)) size
 """
-## run(text3)
+## run(eg_stack)
 #. 2
 
 fact = """
@@ -53,9 +62,11 @@ factorial of 5
 ## run(fact)
 #. 120
 
-## run("parse of '2+3'")
-#. {(2 + 3)}
 ## run("global-environment at 'no'")
 #. False
+## run("(make-list of 42 and 137) ++ (make-list of 'hello')")
+#. (42, 137, 'hello')
+## run("parse of '2+3'")
+#. {(2 + 3)}
 ## run("(parse of '2+3') run-in global-environment")
 #. 5

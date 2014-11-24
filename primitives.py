@@ -6,9 +6,11 @@ from core import call, primitive_vtables
 
 def install():
     primitive_vtables[type(None)] = {}
-    primitive_vtables[bool]  = bool_vtable
+    primitive_vtables[bool] = bool_vtable
     for t in num_types: primitive_vtables[t] = num_vtable
     for t in str_types: primitive_vtables[t] = str_vtable
+    primitive_vtables[list] = list_vtable
+    primitive_vtables[tuple] = tuple_vtable
 
 str_types = (str, unicode)
 num_types = (int, long, float)
@@ -26,6 +28,9 @@ def as_number(thing):
     if isinstance(thing, num_types):
         return thing
     assert False, "Not a number: %r" % (thing,)
+
+
+# Sequence types
 
 def find_default(rcvr, (other, default), k):
     try:
@@ -46,12 +51,17 @@ def as_string(thing):
         return thing
     assert False, "Not a string: %r" % (thing,)
 
-str_vtable = {('has',):  has,
-              ('at',):   at,
-              ('find',): find,
-              ('find', 'default',): find_default,
-              ('size',): size,
-              ('++',):   add,
-              ('=',):    eq,
-              ('<',):    lt,
+sequence_vtable = {
+    ('has',):  has,
+    ('at',):   at,
+    ('find',): find,
+    ('find', 'default',): find_default,
+    ('size',): size,
+    ('++',):   add,
+    ('=',):    eq,
+    ('<',):    lt,
 }
+
+str_vtable = sequence_vtable
+list_vtable = sequence_vtable   # XXX sure you want this?
+tuple_vtable = sequence_vtable
