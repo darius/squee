@@ -57,10 +57,11 @@ params         = ` id params
 id             = ([A-Za-z][_A-Za-z0-9-]*) _
 opid           = ([~!@%&*\-+=|\\<>,?\/]+) _
 number         = (-?\d+)                  _  
-string         = ('(?:''|[^'])*')         _  
+string         = '((?:''|[^'])*)'         _  
 
 _              = \s*
 """
+# XXX string literals with '' need unescaping
 
 def mk_block_method(params, body):
     cue = ('of',) + ('and',)*(len(params)-1) if params else ('run',)
@@ -122,7 +123,7 @@ push of element on stack ::
 """
 
 ## parse(text2)
-#. ({empty-stack ::= {('is-empty',): {yes}; ('pop',): {(complain of "'Underflow'")}; ('size',): {0}; ('top',): {(complain of "'Underflow'")}}; push ::= {('of', 'on') ('element', 'stack'): {{('is-empty',): {no}; ('pop',): {stack}; ('size',): {(1 + (stack size))}; ('top',): {element}}}}},)
+#. ({empty-stack ::= {('is-empty',): {yes}; ('pop',): {(complain of 'Underflow')}; ('size',): {0}; ('top',): {(complain of 'Underflow')}}; push ::= {('of', 'on') ('element', 'stack'): {{('is-empty',): {no}; ('pop',): {stack}; ('size',): {(1 + (stack size))}; ('top',): {element}}}}},)
 
 ## parse("foo of 42 + bar of 137")
 #. ({((foo of 42) + (bar of 137))},)
