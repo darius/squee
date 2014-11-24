@@ -20,12 +20,10 @@ class Parse(object):
     vtable = {('of',): lambda rcvr, (text,), k: (k, parse(primitives.as_string(text))[0])}
 
 global_env.adjoin('parse', Parse())
+global_env.adjoin('global-environment', global_env)
 
 
 # Testing
-
-## run("parse of '2+3'")
-#. {(2 + 3)}
 
 ## run('42')
 #. 42
@@ -54,3 +52,10 @@ factorial of 5
 """
 ## run(fact)
 #. 120
+
+## run("parse of '2+3'")
+#. {(2 + 3)}
+## run("global-environment at 'no'")
+#. False
+## run("(parse of '2+3') run-in global-environment")
+#. 5

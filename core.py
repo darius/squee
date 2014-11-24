@@ -33,3 +33,8 @@ def call(receiver, selector, arguments, k):
 
 primitive_vtables = {}
 miranda_methods = {}
+
+def vtable_union(vtable1, vtable2):
+    result = dict(vtable1)
+    result.update(vtable2)
+    return result

@@ -7,7 +7,13 @@ from collections import namedtuple
 from core import call
 from environments import extend, undefined
 
+expr_vtable = {
+    ('defs',):   lambda self, _, k:      (k, self.defs()),
+    ('run-in',): lambda self, (env,), k: self.eval(env, k),
+}
+
 class Constant(namedtuple('_Constant', 'value')):
+    vtable = expr_vtable
     def defs(self):
         return ()
     def eval(self, env, k):
@@ -16,6 +22,7 @@ class Constant(namedtuple('_Constant', 'value')):
         return repr(self.value)
 
 class Fetch(namedtuple('_Fetch', 'name')):
+    vtable = expr_vtable
     def defs(self):
         return ()
     def eval(self, env, k):
@@ -24,6 +31,7 @@ class Fetch(namedtuple('_Fetch', 'name')):
         return str(self.name)
 
 class Then(namedtuple('_Then', 'expr1 expr2')):
+    vtable = expr_vtable
     def defs(self):
         return self.expr1.defs() + self.expr2.defs()
     def eval(self, env, k):
@@ -35,6 +43,7 @@ def then_k(_, (self, env), k):
     return self.expr2.eval(env, k)
 
 class Seclude(object):
+    vtable = expr_vtable
     def __init__(self, expr):
         self.expr = expr
         self.vars = expr.defs()
@@ -48,6 +57,7 @@ class Seclude(object):
         return '{%r}' % (self.expr,)
 
 class Define(object):
+    vtable = expr_vtable
     def __init__(self, var, expr):
         self.var = var
         self.expr = expr
@@ -63,6 +73,7 @@ def define_k(value, (env, self), k):
     return k, None
 
 class Actor(object):
+    vtable = expr_vtable
     def __init__(self, methods):
         self.vtable = {method.cue: method for method in methods}
     def defs(self):
@@ -90,6 +101,7 @@ class Thing(object):
         return '<%r %r>' % (self.env, self.vtable)
 
 class Call(namedtuple('_Call', 'subject cue operands')):
+    vtable = expr_vtable
     def defs(self):
         return sum((expr.defs() for expr in (self.subject,) + self.operands),
                    ())

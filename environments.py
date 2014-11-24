@@ -5,6 +5,11 @@ bindings, resolved once.
 """
 
 from collections import namedtuple
+from core import vtable_union
+
+env_vtable = {
+    ('at',):       lambda self, (key,), k:  (k, self.get(key)),
+}
 
 class GlobalEnv(namedtuple('_GlobalEnv', 'rib')):
     def adjoin(self, key, value):
@@ -14,6 +19,9 @@ class GlobalEnv(namedtuple('_GlobalEnv', 'rib')):
         return self.rib[key]
     def __repr__(self):
         return 'GlobalEnv'
+    vtable = vtable_union(env_vtable, {
+        ('at', 'adjoin'): lambda self, (key, value), k: (k, self.adjoin(key, value)),
+    })
 
 undefined = object()
 
@@ -34,4 +42,6 @@ class Env(namedtuple('_Env', 'rib container')):
             return self.container.get(key)
     def __repr__(self):
         return 'Env(%r) / %r' % (self.rib, self.container)
-
+    vtable = vtable_union(env_vtable, {
+        ('at', 'define'): lambda self, (key, value), k: (k, self.define(key, value)),
+    })
