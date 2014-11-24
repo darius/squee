@@ -16,8 +16,16 @@ global_env = GlobalEnv({})
 global_env.adjoin('no', False)
 global_env.adjoin('yes', True)
 
+class Parse(object):
+    vtable = {('of',): lambda rcvr, (text,), k: (k, parse(primitives.as_string(text))[0])}
+
+global_env.adjoin('parse', Parse())
+
 
 # Testing
+
+## run("parse of '2+3'")
+#. {(2 + 3)}
 
 ## run('42')
 #. 42
