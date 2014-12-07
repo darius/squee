@@ -75,13 +75,13 @@ def define_k(value, (env, self), k):
 class Actor(object):
     vtable = expr_vtable
     def __init__(self, methods):
-        self.vtable = {method.cue: method for method in methods}
+        self.value_vtable = {method.cue: method for method in methods}
     def defs(self):
         return ()
     def eval(self, env, k):
-        return k, Thing(env, self.vtable)
+        return k, Thing(env, self.value_vtable)
     def __repr__(self):
-        return '{%s}' % '; '.join(sorted(map(repr, self.vtable.values())))
+        return '{%s}' % '; '.join(sorted(map(repr, self.value_vtable.values())))
 
 class Method(namedtuple('_Method', 'cue params expr')):
     def __call__(self, receiver, arguments, k):
