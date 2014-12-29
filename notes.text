@@ -13,6 +13,7 @@ object.
 
 And Self should be worth study:
 http://handbook.selflanguage.org/4.5/langref.html
+http://iolanguage.org/scm/io/docs/IoGuide.html#Syntax-Expressions
 
 Conceivably also:
 https://github.com/TikhonJelvis/TPL/
@@ -40,6 +41,7 @@ variable-names-also-with-dashes.
 But let's give it a chance.
 
 http://www.haskell.org/onlinereport/lexemes.html#lexemes-layout
+https://github.com/otac0n/Pegasus/wiki/Significant-Whitespace-Parsing
 
 
 How about a rights-amplification primitive?
