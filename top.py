@@ -55,7 +55,7 @@ push of element on stack :: {
 fact = """
 factorial of n :: {
    (0 = n) if-so:  { 1 }
-           if-not: { n * (factorial of (n - 1)) }
+           if-not: { n * factorial of (n - 1) }
 };
 factorial of 5
 """
