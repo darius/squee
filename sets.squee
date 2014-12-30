@@ -14,7 +14,7 @@ adjoining of n to s :: {
       if-not: {
          extension :: {
             is-empty: { no };
-            has k:    { n == k ||: { s has k } };
+            has k:    { (n = k) ||: { s has k } };
             adjoin k: { adjoining of k to extension };
             merge t:  { merging of extension with t }
          }

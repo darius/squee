@@ -15,14 +15,19 @@ def install():
 str_types = (str, unicode)
 num_types = (int, long, float)
 
-bool_vtable = {('if-so', 'if-not'): lambda rcvr, args, k: call(args[not rcvr], ('run',), (), k)}
+bool_vtable = {
+    ('if-so', 'if-not'): lambda rcvr, args, k: call(args[not rcvr], ('run',), (), k),
+    ('||',): lambda rcvr, (thunk,), k: (k, rcvr) if rcvr else call(thunk, ('run',), (), k),
+    ('&&',): lambda rcvr, (thunk,), k: call(thunk, ('run',), (), k) if rcvr else (k, rcvr),
+}
 
-num_vtable = {('+',): lambda rcvr, (other,), k: (k, rcvr + as_number(other)),
-              ('*',): lambda rcvr, (other,), k: (k, rcvr * as_number(other)),
-              ('-',): lambda rcvr, (other,), k: (k, rcvr - as_number(other)),
-              ('=',): lambda rcvr, (other,), k: (k, rcvr == other), # XXX object method
-              ('<',): lambda rcvr, (other,), k: (k, rcvr < other),
-             }
+num_vtable = {
+    ('+',): lambda rcvr, (other,), k: (k, rcvr + as_number(other)),
+    ('*',): lambda rcvr, (other,), k: (k, rcvr * as_number(other)),
+    ('-',): lambda rcvr, (other,), k: (k, rcvr - as_number(other)),
+    ('=',): lambda rcvr, (other,), k: (k, rcvr == other), # XXX object method
+    ('<',): lambda rcvr, (other,), k: (k, rcvr < other),
+}
 
 def as_number(thing):
     if isinstance(thing, num_types):
