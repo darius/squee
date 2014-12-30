@@ -70,3 +70,16 @@ factorial of 5
 #. {(2 + 3)}
 ## run("(parse of '2+3') run-in global-environment")
 #. 5
+
+## sets = open('sets.squee').read()
+## run(sets)
+#. Traceback (most recent call last):
+#.   File "top.py", line 12, in run
+#.     return trampoline(expr.eval(global_env, final_k))
+#.   File "/home/darius/git/squee/core.py", line 12, in trampoline
+#.     k, value = fn(value, free_var, k)
+#.   File "/home/darius/git/squee/absyntax.py", line 125, in call_k
+#.     return call(subject, self.cue, arguments, k)
+#.   File "/home/darius/git/squee/core.py", line 33, in call
+#.     method = miranda_methods[selector] # TODO: handle method-missing
+#. KeyError: ('||',)

@@ -2,10 +2,12 @@
 The kernel: stepping and sending.
 """
 
+loud = 0
+
 def trampoline(state):
     k, value = state
     while k is not None:
-#        traceback((k, value))
+        if loud: traceback((k, value))
         fn, free_var, k = k
         k, value = fn(value, free_var, k)
     return value
