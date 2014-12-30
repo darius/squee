@@ -1,3 +1,6 @@
+-- From William Cook's essay on OOP vs. ADTs
+-- http://www.cs.utexas.edu/~wcook/Drafts/2009/essay.pdf
+
 empty :: {
    is-empty: { yes };
    has k:    { no };
