@@ -118,3 +118,7 @@ push of element on stack ::
 
 ## parse('a ::= 2; a + 3')
 #. ({a ::= 2; (a + 3)},)
+
+## sets = open('sets.squee').read()
+## parse(sets)
+#. ({empty ::= {('adjoin',) ('k',): {(adjoining of k to empty)}; ('has',) ('k',): {no}; ('is-empty',): {yes}; ('merge',) ('s',): {s}}; adjoining ::= {('of', 'to') ('n', 's'): {((s has n) if-so {('run',): {s}} if-not {('run',): {extension ::= {('adjoin',) ('k',): {(adjoining of k to extension)}; ('has',) ('k',): {(n == (k || {('run',): {(s has k)}}))}; ('is-empty',): {no}; ('merge',) ('t',): {(merging of extension with t)}}}})}}; merging ::= {('of', 'with') ('s1', 's2'): {meld ::= {('adjoin',) ('k',): {(adjoining of k to meld)}; ('has',) ('k',): {((s1 has k) || {('run',): {(s2 has k)}})}; ('is-empty',): {((s1 is-empty) && {('run',): {(s2 is-empty)}})}; ('merge',) ('s',): {(merging of meld with s)}}}}},)
