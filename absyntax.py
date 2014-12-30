@@ -70,7 +70,7 @@ class Define(object):
 
 def define_k(value, (env, self), k):
     env.define(self.var, value)
-    return k, None
+    return k, value
 
 class Actor(object):
     vtable = expr_vtable
