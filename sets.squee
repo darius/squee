@@ -28,4 +28,6 @@ merging of s1 with s2 :: {
       adjoin k: { adjoining of k to meld };
       merge s:  { merging of meld with s }
    }
-}
+};
+
+make-list of (empty has 42) and ((empty adjoin 42) has 42)
