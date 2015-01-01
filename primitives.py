@@ -21,6 +21,11 @@ bool_vtable = {
     ('&&',): lambda rcvr, (thunk,), k: call(thunk, ('run',), (), k) if rcvr else (k, rcvr),
 }
 
+def as_bool(thing):
+    if isinstance(thing, bool):
+        return thing
+    assert False, "Not a claim: %r" % (thing,)
+
 num_vtable = {
     ('+',): lambda rcvr, (other,), k: (k, rcvr + as_number(other)),
     ('*',): lambda rcvr, (other,), k: (k, rcvr * as_number(other)),

@@ -13,10 +13,14 @@ def run(text):
 
 global_env = GlobalEnv({})
 
+global_env.adjoin('global-environment', global_env)
+
+class Claim(object):
+    vtable = {('from',): lambda rcvr, (x,), k: (k, primitives.as_bool(x))}
+
 global_env.adjoin('no', False)
 global_env.adjoin('yes', True)
-global_env.adjoin('nil', ())
-global_env.adjoin('global-environment', global_env)
+global_env.adjoin('Claim', Claim())
 
 class MakeList(object):
     entuple = lambda rcvr, args, k: (k, args)
@@ -24,6 +28,7 @@ class MakeList(object):
               ('of','and'): entuple,
               ('of','and','and'): entuple}
 
+global_env.adjoin('nil', ())
 global_env.adjoin('make-list', MakeList())
 
 class Parse(object):
@@ -53,9 +58,14 @@ push of element on stack :: {
 #. 2
 
 fact = """
+so :: {
+   if claim then on-yes else on-no: {
+      (Claim from claim) if-so on-yes if-not on-no
+   }
+};
 factorial of n :: {
-   (0 = n) if-so:  { 1 }
-           if-not: { n * factorial of (n - 1) }
+   so if (0 = n) then: { 1 }
+                 else: { n * factorial of (n - 1) }
 };
 factorial of 5
 """
