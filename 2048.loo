@@ -23,8 +23,8 @@ twenty48 play ::
                               sliding for-each `frame:
                                  ui render [heading, frame view, score]
                                  ui sleep 0.04
-                              new-v ::= (random random < .9) if-so:  2
-                                                             if-not: 4
+                              new-v ::= (random fraction < .9) if-so:  2
+                                                               if-not: 4
                               play ing ((sliding last) plop new-v)
 
    play ing ((empty-board plop 2) plop 2)
