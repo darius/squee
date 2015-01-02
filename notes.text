@@ -195,6 +195,17 @@ infix-syntax functions -- that is, (subject verb object) meaning to
 call verb, which could be generic on subject, or not.
 
 
+Inheritance: no.
+E-style inheritance: yes?
+Traits: maybe? You'd define a trait pretty much just like an object,
+except there's a 'self' parameter. And we'd like to avoid having to
+cons up a new instance of the trait for every object that includes it,
+unlike E-style inheritance.
+
+To do: code up these patterns using just the core constructs and see
+if that suggests nice sugar and compiler smarts.
+
+
 More syntax musing:
 
 What if 'f x' (juxtaposition) is a call (like E's f.run(x))
