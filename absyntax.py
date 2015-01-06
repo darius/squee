@@ -33,11 +33,16 @@ class Fetch(namedtuple('_Fetch', 'name')):
 class Then(namedtuple('_Then', 'expr1 expr2')):
     vtable = expr_vtable
     def defs(self):
-        return self.expr1.defs() + self.expr2.defs()
+        return combine(self.expr1.defs(), self.expr2.defs())
     def eval(self, env, k):
         return self.expr1.eval(env, (then_k, (self, env), k))
     def __repr__(self):
         return '%r; %r' % (self.expr1, self.expr2)
+
+def combine(defs1, defs2):
+    if set(defs1) & set(defs2):
+        raise Exception("Duplicate definitions")
+    return defs1 + defs2
 
 def then_k(_, (self, env), k):
     return self.expr2.eval(env, k)
@@ -103,8 +108,7 @@ class Thing(object):
 class Call(namedtuple('_Call', 'subject cue operands')):
     vtable = expr_vtable
     def defs(self):
-        return sum((expr.defs() for expr in (self.subject,) + self.operands),
-                   ())
+        return reduce(combine, (expr.defs() for expr in (self.subject,) + self.operands))
     def eval(self, env, k):
         return self.subject.eval(env, (evrands_k, (self, env), k))
     def __repr__(self):
