@@ -1,7 +1,8 @@
 """
 Environments map name -> value. A global env can be mutated; an
 ordinary env shadows a containing env, and can have undefined
-bindings, resolved once.
+bindings, resolved once. (That's meant to be a stopgap until
+we get around to implementing promises.)
 """
 
 from collections import namedtuple
