@@ -17,7 +17,10 @@ value.
 
 A Define expression evaluates to what its subexpression evaluates to.
 The scope of the variable is the whole Nest it's defined in;
-if it's referenced before it's bound, an error is raised.
+if it's referenced before it's bound, an error is raised. (I think
+I want to change this to a promise semantics instead, but promises
+aren't implemented yet.)
+
 (Nest was called 'block' in Algol-60; it's renamed here to avoid
 confusion with Smalltalk blocks.)
 
