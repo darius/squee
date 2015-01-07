@@ -1,0 +1,63 @@
+-- Ported from github.com/darius/selfcentered/lambdacompiler
+
+compile program expr ::
+   expr compile-in empty-map preceding ['halt']
+
+make-var named name ::
+   ::
+      free-vars:
+         make-set with name
+      compile-in senv preceding k:
+         [senv at name] .. k
+
+make-lam given name do body ::
+   fvs ::= (body free-vars) remove name
+   ::
+      free-vars: fvs
+      compile-in senv preceding k:
+         code ::= body compile-in (make-static-env for name enclosing fvs)
+                       preceding ['restore']
+         (['defer'; fvs size; code size]
+          .. fvs collect `v: senv at v
+          .. code
+          .. k)
+
+make-app applying operator to operand ::
+   ::
+      free-vars:
+         operator free-vars | operand free-vars
+      compile-in senv preceding k:
+         code ::= operand compile-in senv
+                          preceding (operator compile-in senv
+                                              preceding ['invoke'])
+         so if ['restore'] == k
+            then: code
+            else: ['save'; code size] .. code .. k
+
+make-static-env for name enclosing vars ::
+   (make-map from name to 'arg') extend-with (make-map zipping vars with (count from 1))
+
+-- XXX the `*fs notation is like Python lambda *fs: ...
+
+fold_app ::= `f `*rands: rands initially f
+                               foldl `rator `rand: make-app applying rator to rand
+
+fold_lam ::= `vars `e: vars foldr `name `body: make-lam given name do body
+                            finally e
+
+-- XXX ad-hoc foo{{ ... }} syntax like E quasiliterals;
+-- the concrete form of the grammar is Parson's.
+lambda-grammar ::= grammar{{
+start:   _ e ~/./.
+e:       f+                     :fold_app.
+f:       v                      :Var
+      | '\\'_ [v+ :hug] '.'_ e  :fold_lam
+      | '('_ e ')'_.
+v =     /([A-Za-z_]\w*)\b/_.
+_ =     /\s*/.
+}} using (make-map joining [(make-map from 'Var' to `name: make-var named name),
+                            (make-map from 'fold_app' to fold_app),
+                            (make-map from 'fold_lam' to fold_lam)])
+-- XXX we realrly need a syntax for map literals.
+-- What if it looked just like no-argument method definitions?
+-- (Except for some directive making it a map literal instead of an object.)
