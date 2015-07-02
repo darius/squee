@@ -194,6 +194,9 @@ Generic functions would also go naturally with non-generic but
 infix-syntax functions -- that is, (subject verb object) meaning to
 call verb, which could be generic on subject, or not.
 
+Idea: (subject <verb> object) as syntax for such calls. Haskell's
+(x `f` y) is out since we currently have another use for backticks.
+
 
 Inheritance: no.
 E-style inheritance: yes?
@@ -204,6 +207,9 @@ unlike E-style inheritance.
 
 To do: code up these patterns using just the core constructs and see
 if that suggests nice sugar and compiler smarts.
+
+Reminder: MarkM cowrote a paper on traits: 
+http://research.google.com/pubs/author35958.html
 
 
 More syntax musing:
@@ -229,3 +235,16 @@ name actually called.
 read
 http://julesjacobs.github.io/2014/10/18/the-best-collections-library-design-2.html
 http://www.informit.com/articles/printerfriendly/1407357
+
+More on collections:
+http://www.slideshare.net/extempore/a-scala-corrections-library/35
+offers these principles for Scala collections redesigned:
+* A Set is a Seq without duplicates.
+* A Map is a Set paired with a function K=>V.
+* [Forget about mutable and parallel collections.
+   Not part of this framework.]
+* "Views" should be how it always works.
+Also, slide 35 in the same presentation:
+Two complementary ways to define Set[A], intensional vs. extensional.
+Defining signatures A=>Bool vs. Iterable[A].
+Not the same thing.
