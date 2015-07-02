@@ -86,16 +86,17 @@ class Actor(object):
     def eval(self, env, k):
         return k, Thing(env, self.value_vtable)
     def __repr__(self):
-        return '{%s}' % '; '.join(sorted(map(repr, self.value_vtable.values())))
+        return '::{%s}' % '; '.join(sorted(map(repr, self.value_vtable.values())))
 
 class Method(namedtuple('_Method', 'cue params expr')):
     def __call__(self, receiver, arguments, k):
         return self.expr.eval(extend(receiver.env, self.params, arguments), k)
     def __repr__(self):
         if self.params:
-            head = '%s %r' % (self.cue, self.params)
+            head = ' '.join(map(' '.join, zip(self.cue, self.params)))
         else:
-            head = self.cue
+            assert len(self.cue) == 1
+            head = self.cue[0]
         return '%s: %r' % (head, self.expr)
 
 class Thing(object):
