@@ -65,7 +65,7 @@ parse = Grammar(parser_grammar)(**globals()).program
 ## parse('adjoining of (k + 5) to empty')
 #. ({(adjoining of (k + 5) to empty)},)
 ## parse(': { 1 }')
-#. ({::{run: {1}}},)
+#. ({:: {run: {1}}},)
 
 text1 = """
 empty :: 
@@ -77,7 +77,7 @@ empty ::
 """
 
 ## parse(text1)
-#. ({empty ::= ::{adjoin k: {(adjoining of k to empty)}; has k: {no}; is-empty: {yes}; merge s: {s}}},)
+#. ({empty :: {adjoin k: {(adjoining of k to empty)}; has k: {no}; is-empty: {yes}; merge s: {s}}},)
 
 text2 = """
 empty-stack ::
@@ -97,7 +97,7 @@ push of element on stack ::
 """
 
 ## parse(text2)
-#. ({empty-stack ::= ::{is-empty: {yes}; pop: {(complain of 'Underflow')}; size: {0}; top: {(complain of 'Underflow')}}; push ::= ::{of element on stack: {::{is-empty: {no}; pop: {stack}; size: {(1 + (stack size))}; top: {element}}}}},)
+#. ({empty-stack :: {is-empty: {yes}; pop: {(complain of 'Underflow')}; size: {0}; top: {(complain of 'Underflow')}}; push :: {of element on stack: {:: {is-empty: {no}; pop: {stack}; size: {(1 + (stack size))}; top: {element}}}}},)
 
 ## parse("foo of 42 + bar of 137")
 #. ({((foo of 42) + (bar of 137))},)
@@ -107,4 +107,4 @@ push of element on stack ::
 
 ## sets = open('sets.squee').read()
 ## parse(sets)
-#. ({empty ::= ::{adjoin k: {(adjoining of k to empty)}; has k: {no}; is-empty: {yes}; merge s: {s}}; adjoining ::= ::{of n to s: {((s has n) if-so ::{run: {s}} if-not ::{run: {extension ::= ::{adjoin k: {(adjoining of k to extension)}; has k: {((n = k) || ::{run: {(s has k)}})}; is-empty: {no}; merge t: {(merging of extension with t)}}}})}}; merging ::= ::{of s1 with s2: {meld ::= ::{adjoin k: {(adjoining of k to meld)}; has k: {((s1 has k) || ::{run: {(s2 has k)}})}; is-empty: {((s1 is-empty) && ::{run: {(s2 is-empty)}})}; merge s: {(merging of meld with s)}}}}; (make-list of (empty has 42) and ((empty adjoin 42) has 42))},)
+#. ({empty :: {adjoin k: {(adjoining of k to empty)}; has k: {no}; is-empty: {yes}; merge s: {s}}; adjoining :: {of n to s: {((s has n) if-so :: {run: {s}} if-not :: {run: {extension :: {adjoin k: {(adjoining of k to extension)}; has k: {((n = k) || :: {run: {(s has k)}})}; is-empty: {no}; merge t: {(merging of extension with t)}}}})}}; merging :: {of s1 with s2: {meld :: {adjoin k: {(adjoining of k to meld)}; has k: {((s1 has k) || :: {run: {(s2 has k)}})}; is-empty: {((s1 is-empty) && :: {run: {(s2 is-empty)}})}; merge s: {(merging of meld with s)}}}}; (make-list of (empty has 42) and ((empty adjoin 42) has 42))},)

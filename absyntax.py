@@ -71,7 +71,8 @@ class Define(object):
     def eval(self, env, k):
         return self.expr.eval(env, (define_k, (env, self), k))
     def __repr__(self):
-        return '%s ::= %r' % (self.var, self.expr)
+        fmt = '%s %r' if isinstance(self.expr, Actor) else '%s ::= %r'
+        return fmt % (self.var, self.expr)
 
 def define_k(value, (env, self), k):
     env.define(self.var, value)
@@ -86,7 +87,7 @@ class Actor(object):
     def eval(self, env, k):
         return k, Thing(env, self.value_vtable)
     def __repr__(self):
-        return '::{%s}' % '; '.join(sorted(map(repr, self.value_vtable.values())))
+        return ':: {%s}' % '; '.join(sorted(map(repr, self.value_vtable.values())))
 
 class Method(namedtuple('_Method', 'cue params expr')):
     def __call__(self, receiver, arguments, k):
