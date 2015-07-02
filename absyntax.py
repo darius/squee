@@ -20,6 +20,8 @@ class Constant(namedtuple('_Constant', 'value')):
         return k, self.value
     def __repr__(self):
         return repr(self.value)
+    def pp(self, out):
+        out.pr(repr(self))
 
 class Fetch(namedtuple('_Fetch', 'name')):
     vtable = expr_vtable
@@ -29,6 +31,8 @@ class Fetch(namedtuple('_Fetch', 'name')):
         return k, env.get(self.name)
     def __repr__(self):
         return str(self.name)
+    def pp(self, out):
+        out.pr(repr(self))
 
 class Then(namedtuple('_Then', 'expr1 expr2')):
     vtable = expr_vtable
@@ -38,6 +42,10 @@ class Then(namedtuple('_Then', 'expr1 expr2')):
         return self.expr1.eval(env, (then_k, (self, env), k))
     def __repr__(self):
         return '%r; %r' % (self.expr1, self.expr2)
+    def pp(self, out):
+        self.expr1.pp(out)
+        out.newline()
+        self.expr2.pp(out)
 
 def combine(defs1, defs2):
     if set(defs1) & set(defs2):
@@ -60,6 +68,14 @@ class Nest(object):
         return self.expr.eval(extend(env, self.vars, vals), k)
     def __repr__(self):
         return '{%r}' % (self.expr,)
+    def pp(self, out):
+        out.pr('{')
+        out.indent(4)
+        out.newline()
+        self.expr.pp(out)
+        out.indent(-4)
+        out.newline()
+        out.pr('}')
 
 class Define(object):
     vtable = expr_vtable
@@ -73,6 +89,10 @@ class Define(object):
     def __repr__(self):
         fmt = '%s %r' if isinstance(self.expr, Actor) else '%s ::= %r'
         return fmt % (self.var, self.expr)
+    def pp(self, out):
+        out.pr(self.var)
+        out.pr(' ' if isinstance(self.expr, Actor) else ' ::= ')
+        self.expr.pp(out)
 
 def define_k(value, (env, self), k):
     env.define(self.var, value)
@@ -88,17 +108,32 @@ class Actor(object):
         return k, Thing(env, self.value_vtable)
     def __repr__(self):
         return ':: {%s}' % '; '.join(sorted(map(repr, self.value_vtable.values())))
+    def pp(self, out):
+        out.pr(':: {')
+        out.indent(4)
+        for method in sorted(self.value_vtable.values(),
+                             key=lambda method: method.header()):
+            out.newline()
+            method.pp(out)
+        out.indent(-4)
+        out.newline()
+        out.pr('}')
 
 class Method(namedtuple('_Method', 'cue params expr')):
     def __call__(self, receiver, arguments, k):
         return self.expr.eval(extend(receiver.env, self.params, arguments), k)
     def __repr__(self):
-        if self.params:
-            head = ' '.join(map(' '.join, zip(self.cue, self.params)))
-        else:
+        return '%s: %r' % (self.header(), self.expr)
+    def header(self):
+        if not self.params:
             assert len(self.cue) == 1
-            head = self.cue[0]
-        return '%s: %r' % (head, self.expr)
+            return self.cue[0]
+        else:
+            return ' '.join(map(' '.join, zip(self.cue, self.params)))
+    def pp(self, out):
+        out.pr(self.header())
+        out.pr(': ')
+        self.expr.pp(out)
 
 class Thing(object):
     def __init__(self, env, vtable):
@@ -114,15 +149,23 @@ class Call(namedtuple('_Call', 'subject cue operands')):
     def eval(self, env, k):
         return self.subject.eval(env, (evrands_k, (self, env), k))
     def __repr__(self):
-        subject = repr(self.subject)
-        if len(self.operands) == 0:
-            return '(%s %s)' % (subject, self.cue[0])
-        elif len(self.operands) == 1:
-            return '(%s %s %r)' % (subject, self.cue[0], self.operands[0])
+        if not self.operands:
+            assert len(self.cue) == 1
+            return '(%r %s)' % (self.subject, self.cue[0])
         else:
             pairs = zip(self.cue, self.operands)
-            return '(%s%s)' % (subject,
+            return '(%r%s)' % (self.subject,
                                ''.join(' %s %r' % pair for pair in pairs))
+    def pp(self, out):
+        out.pr('(')
+        self.subject.pp(out)
+        if not self.operands:
+            out.pr(' ' + self.cue[0])
+        else:
+            for k, operand in zip(self.cue, self.operands):
+                out.pr(' ' + k + ' ')
+                operand.pp(out)
+        out.pr(')')
 
 def evrands_k(subject, (self, env), k):
     return evrands(self.operands, env, (call_k, (subject, self), k))
