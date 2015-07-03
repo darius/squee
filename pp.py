@@ -23,11 +23,15 @@ class Out(object):
 if __name__ == '__main__':
     import parse_sans_offsides as parsing
 
-    e1, = parsing.parse(parsing.text1)
-    e2, = parsing.parse(parsing.text2)
+    if len(sys.argv) == 1:
+        e1, = parsing.parse(parsing.text1)
+        text = parsing.text2
+    elif len(sys.argv) == 2:
+        text = open(sys.argv[1]).read()
+    else:
+        assert False
 
+    e, = parsing.parse(text)
     out = Out()
-    e1.pp(out)
-    out.newline()
-    e2.pp(out)
+    e.pp(out)
     out.newline()
