@@ -12,7 +12,8 @@ sequence       : big (';'_ sequence)?.
 
 big            : make
                | id '::='_ big                   :Define
-               | binsend.
+               | binsend
+               | body.
 
 make           : id [method_decl '::'_ body      :Method :hug :Actor]
                                                  :Define
