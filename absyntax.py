@@ -12,6 +12,19 @@ expr_vtable = {
     ('run-in',): lambda self, (env,), k: self.eval(env, k),
 }
 
+class Parenthesize(namedtuple('_Parenthesize', 'expr')):
+    vtable = expr_vtable
+    def defs(self):
+        return self.expr.defs()
+    def eval(self, env, k):
+        return self.expr.eval(env, k)
+    def __repr__(self):
+        return '(%r)' % (self.expr,)
+    def pp(self, out):
+        out.pr('(')
+        self.expr.pp(out)
+        out.pr(')')
+
 class Constant(namedtuple('_Constant', 'value')):
     vtable = expr_vtable
     def defs(self):
@@ -152,13 +165,12 @@ class Call(namedtuple('_Call', 'subject cue operands')):
     def __repr__(self):
         if not self.operands:
             assert len(self.cue) == 1
-            return '(%r %s)' % (self.subject, self.cue[0])
+            return '%r %s' % (self.subject, self.cue[0])
         else:
             pairs = zip(self.cue, self.operands)
-            return '(%r%s)' % (self.subject,
-                               ''.join(' %s %r' % pair for pair in pairs))
+            return '%r%s' % (self.subject,
+                             ''.join(' %s %r' % pair for pair in pairs))
     def pp(self, out):
-        out.pr('(')
         self.subject.pp(out)
         if not self.operands:
             out.pr(' ' + self.cue[0])
@@ -166,7 +178,6 @@ class Call(namedtuple('_Call', 'subject cue operands')):
             for k, operand in zip(self.cue, self.operands):
                 out.pr(' ' + k + ' ')
                 operand.pp(out)
-        out.pr(')')
 
 def evrands_k(subject, (self, env), k):
     return evrands(self.operands, env, (call_k, (subject, self), k))
