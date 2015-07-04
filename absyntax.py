@@ -69,13 +69,13 @@ class Nest(object):
     def __repr__(self):
         return '{%r}' % (self.expr,)
     def pp(self, out):
-        out.pr('{')
+        out.pr('<div class="nest d%d">' % (out.margin // 4))
         out.indent(4)
-        out.newline()
+        #out.newline()
         self.expr.pp(out)
         out.indent(-4)
         out.newline()
-        out.pr('}')
+        out.pr('</div>')
 
 class Define(object):
     vtable = expr_vtable
@@ -91,7 +91,7 @@ class Define(object):
         return fmt % (self.var, self.expr)
     def pp(self, out):
         out.pr(self.var)
-        out.pr(' ' if isinstance(self.expr, Actor) else ' ::= ')
+        out.pr(' ' if isinstance(self.expr, Actor) else ' ::= ') # XXX lift the <div> to here if actor
         self.expr.pp(out)
 
 def define_k(value, (env, self), k):
@@ -102,22 +102,23 @@ class Actor(object):
     vtable = expr_vtable
     def __init__(self, methods):
         self.value_vtable = {method.cue: method for method in methods}
+        self.cues = [method.cue for method in methods]
     def defs(self):
         return ()
     def eval(self, env, k):
         return k, Thing(env, self.value_vtable)
     def __repr__(self):
-        return ':: {%s}' % '; '.join(sorted(map(repr, self.value_vtable.values())))
+        return ':: {%s}' % '; '.join(repr(self.value_vtable[cue])
+                                     for cue in self.cues)
     def pp(self, out):
-        out.pr(':: {')
+        out.pr('<div class="actor d%d">::' % (out.margin // 4))
         out.indent(4)
-        for method in sorted(self.value_vtable.values(),
-                             key=lambda method: method.header()):
+        for cue in self.cues:
             out.newline()
-            method.pp(out)
+            self.value_vtable[cue].pp(out)
         out.indent(-4)
         out.newline()
-        out.pr('}')
+        out.pr('</div>')
 
 class Method(namedtuple('_Method', 'cue params expr')):
     def __call__(self, receiver, arguments, k):
