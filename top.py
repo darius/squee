@@ -77,7 +77,7 @@ factorial of 5
 ## run("(make-list of 42 and 137) ++ (make-list of 'hello')")
 #. (42, 137, 'hello')
 ## run("parse of '2+3'")
-#. {(2 + 3)}
+#. {2 + 3}
 ## run("(parse of '2+3') run-in global-environment")
 #. 5
 
