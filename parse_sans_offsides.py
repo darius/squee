@@ -6,7 +6,7 @@ from parson import Grammar, alter
 from absyntax import Constant, Fetch, Actor, Call, Then, Define, Nest, Method, Parenthesize
 
 parser_grammar = r"""
-program        : _ sequence !/./                 :mk_body.
+program        : _ sequence :end                 :mk_body.
 
 sequence       : big (';'_ sequence)?.
 
