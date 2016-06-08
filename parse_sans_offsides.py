@@ -8,7 +8,7 @@ from absyntax import Constant, Fetch, Actor, Call, Then, Define, Nest, Method, P
 parser_grammar = r"""
 program        : _ sequence :end                 :mk_body.
 
-sequence       : big (';'_ sequence)?.
+sequence       : big ++ (';'_).
 
 big            : make
                | id '::='_ big                   :Define
@@ -20,7 +20,7 @@ make           : id [method_decl '::'_ body      :Method :hug :Actor]
                                                  :Define
                | id '::'_ actor                  :Define
                |    '::'_ actor.
-actor          : '{'_ method (';'_ method)* '}'_ :hug :Actor.
+actor          : '{'_ method ++ (';'_) '}'_      :hug :Actor.
 method         : method_decl ':'_ body           :Method.
 body           : '{'_ sequence '}'_              :mk_body.
 
