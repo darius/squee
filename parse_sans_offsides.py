@@ -46,8 +46,8 @@ opid           : /([~!@%&*\-+=|\\<>,?\\\/]+)/ _.
 number         : /(-?\d+)/                    _  :int.
 string         : /'((?:''|[^'])*)'/           _.  
 
-_              = whitespace*.
-whitespace     = /\s+|-- .*/.
+_              : whitespace*.
+whitespace     : /\s+|-- .*/.
 """
 # XXX string literals with '' need unescaping
 
