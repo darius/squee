@@ -6,48 +6,48 @@ from parson import Grammar, alter
 from absyntax import Constant, Fetch, Actor, Call, Then, Define, Nest, Method, Parenthesize
 
 parser_grammar = r"""
-program        : _ sequence :end                 :mk_body.
+program        : '' sequence :end              :mk_body.
 
-sequence       : big ++ (';'_).
+sequence       : big ++ ';'.
 
 big            : make
-               | id '::='_ big                   :Define
+               | id '::=' big                  :Define
                | body
                | binsend
                | small.
 
-make           : id [method_decl '::'_ body      :Method :hug :Actor]
-                                                 :Define
-               | id '::'_ actor                  :Define
-               |    '::'_ actor.
-actor          : '{'_ method ++ (';'_) '}'_      :hug :Actor.
-method         : method_decl ':'_ body           :Method.
-body           : '{'_ sequence '}'_              :mk_body.
+make           : id [method_decl '::' body     :Method :hug :Actor]
+                                               :Define
+               | id '::' actor                 :Define
+               |    '::' actor.
+actor          : '{' method ++ ';' '}'    :hug :Actor.
+method         : method_decl ':' body          :Method.
+body           : '{' sequence '}'              :mk_body.
 
 method_decl    : ( opid id
                  | (id id)+
-                 | id)                           :unzip.
+                 | id)                         :unzip.
 
-binsend        : small ([opid small :unzip]      :Call)*.
+binsend        : small ([opid small :unzip]    :Call)*.
 
 small          : tiny
-                 ( [((id tiny)+ | id) :unzip]    :Call)?.
+                 ( [((id tiny)+ | id) :unzip]  :Call)?.
 
-tiny           : number                          :Constant
-               | string                          :Constant
-               | id                              :Fetch
+tiny           : number                        :Constant
+               | string                        :Constant
+               | id                            :Fetch
                | block
-               | '('_ big ')'_                   :Parenthesize.
+               | '(' big ')'                   :Parenthesize.
 
-block          : ('`' id)* :hug ':'_ body        :mk_block_method :hug :Actor.
+block          : ('`' id)* :hug ':' body       :mk_block_method :hug :Actor.
 
-id             : /([A-Za-z][_A-Za-z0-9-]*)/   _.
-opid           : /([~!@%&*\-+=|\\<>,?\\\/]+)/ _.
-number         : /(-?\d+)/                    _  :int.
-string         : /'((?:''|[^'])*)'/           _.  
+id             : /([A-Za-z][_A-Za-z0-9-]*)/.
+opid           : /([~!@%&*\-+=|\\<>,?\\\/]+)/.
+number         : /(-?\d+)/                     :int.
+string         : /'((?:''|[^'])*)'/.  
 
-_              : whitespace*.
-whitespace     : /\s+|-- .*/.
+FNORD         ~: whitespace*.
+whitespace    ~: /\s+|-- .*/.
 """
 # XXX string literals with '' need unescaping
 
